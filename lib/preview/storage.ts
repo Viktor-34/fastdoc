@@ -1,3 +1,4 @@
+// Что сохраняем в localStorage между обновлениями предпросмотра.
 export interface PreviewPayload {
   html: string;
   fontFamily?: string | null;
@@ -10,6 +11,7 @@ const FONT_KEY = 'offerdoc-preview-font';
 const FONT_STYLE_KEY = 'offerdoc-preview-font-style';
 const TS_KEY = 'offerdoc-preview-html-updated';
 
+// Пишем HTML и данные шрифтов в localStorage.
 export function writePreviewPayload(payload: PreviewPayload) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(HTML_KEY, payload.html);
@@ -22,6 +24,7 @@ export function writePreviewPayload(payload: PreviewPayload) {
   localStorage.setItem(TS_KEY, String(payload.timestamp ?? Date.now()));
 }
 
+// Читаем сохранённый HTML; если его нет — возвращаем null.
 export function readPreviewPayload(): PreviewPayload | null {
   if (typeof window === 'undefined') return null;
   const html = localStorage.getItem(HTML_KEY);
@@ -37,6 +40,7 @@ export function readPreviewPayload(): PreviewPayload | null {
   };
 }
 
+// Полностью очищаем сохранённый предпросмотр.
 export function clearPreviewPayload() {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(HTML_KEY);

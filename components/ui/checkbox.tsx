@@ -6,6 +6,7 @@ import { CheckIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Чекбокс на основе Radix с кастомным стилизацией.
 function Checkbox({
   className,
   ...props

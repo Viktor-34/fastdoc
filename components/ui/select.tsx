@@ -6,24 +6,28 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Корневой провайдер Radix Select.
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
 }
 
+// Группировка элементов списка.
 function SelectGroup({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Group>) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />
 }
 
+// Отображаемое значение в триггере селекта.
 function SelectValue({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Value>) {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
+// Кнопка-триггер: управляет размером, состоянием и иконкой.
 function SelectTrigger({
   className,
   size = "default",
@@ -50,6 +54,7 @@ function SelectTrigger({
   )
 }
 
+// Контейнер выпадающего списка, поддерживает popper-позиционирование.
 function SelectContent({
   className,
   children,
@@ -87,6 +92,7 @@ function SelectContent({
   )
 }
 
+// Подпись внутри меню, стилизованный Label.
 function SelectLabel({
   className,
   ...props
@@ -100,6 +106,7 @@ function SelectLabel({
   )
 }
 
+// Один пункт списка с иконкой галочки и disabled-состояниями.
 function SelectItem({
   className,
   children,
@@ -124,6 +131,7 @@ function SelectItem({
   )
 }
 
+// Разделитель между пунктами меню.
 function SelectSeparator({
   className,
   ...props

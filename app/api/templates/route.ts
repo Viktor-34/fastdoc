@@ -11,7 +11,8 @@ export const runtime = 'nodejs';
 const DEFAULT_USER = 'system';
 
 export async function GET(req: NextRequest) {
-  const workspaceId = getActiveWorkspaceId(req.nextUrl.searchParams.get('workspaceId'));
+  // Шаблоны всегда привязаны к рабочей области.
+  const workspaceId = await getActiveWorkspaceId(req.nextUrl.searchParams.get('workspaceId'));
   const templates = await prisma.template.findMany({
     where: { workspaceId },
     orderBy: { createdAt: 'desc' },
@@ -33,17 +34,18 @@ type TemplateCreateBody = {
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as TemplateCreateBody;
   const action = body.action ?? (body.templateId ? 'apply' : 'create');
-  const workspaceId = getActiveWorkspaceId(body.workspaceId);
+  const workspaceId = await getActiveWorkspaceId(body.workspaceId);
   const userId = body.userId ?? DEFAULT_USER;
 
   if (action === 'apply') {
     if (!body.templateId) return new Response('templateId required', { status: 400 });
+    // Находим шаблон и создаём по нему документ.
     const template = await prisma.template.findFirst({
       where: { id: body.templateId, workspaceId },
     });
     if (!template) return new Response('Template not found', { status: 404 });
 
-    const targetWorkspaceId = getActiveWorkspaceId(body.workspaceId ?? template.workspaceId);
+    const targetWorkspaceId = await getActiveWorkspaceId(body.workspaceId ?? template.workspaceId);
     const document = await prisma.document.create({
       data: {
         title: body.title ?? template.name,
@@ -74,6 +76,7 @@ export async function POST(req: NextRequest) {
     json = document.json;
     html = document.html;
   } else {
+    // Если передали JSON напрямую, пересобираем HTML на сервере.
     html = generateHTML(json as JSONContent, createServerExtensions() as unknown as []);
   }
 
@@ -99,7 +102,8 @@ export async function PUT(req: NextRequest) {
   const { id, name, json } = (await req.json()) as TemplateUpdateBody;
   if (!id) return new Response('id required', { status: 400 });
 
-  const workspaceId = getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId();
+  // Не даём вмешиваться в чужие шаблоны.
   const existing = await prisma.template.findFirst({ where: { id, workspaceId } });
   if (!existing) return new Response('Template not found', { status: 404 });
 
@@ -125,7 +129,8 @@ type TemplateDeleteBody = {
 export async function DELETE(req: NextRequest) {
   const { id } = (await req.json()) as TemplateDeleteBody;
   if (!id) return new Response('id required', { status: 400 });
-  const workspaceId = getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId();
+  // Удалять можно только внутри своей рабочей области.
   const existing = await prisma.template.findFirst({ where: { id, workspaceId } });
   if (!existing) return new Response('Template not found', { status: 404 });
   await prisma.template.delete({ where: { id } });

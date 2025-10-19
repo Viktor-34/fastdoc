@@ -5,6 +5,7 @@ import * as LabelPrimitive from "@radix-ui/react-label"
 
 import { cn } from "@/lib/utils"
 
+// Обёртка над Radix Label с базовыми стилями и disabled-состояниями.
 function Label({
   className,
   ...props

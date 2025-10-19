@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'nodejs';
 
+// Возвращает документ по ID (JSON + HTML), используется редактором.
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const { id } = params;
   if (!id) return new Response('Bad request', { status: 400 });
@@ -23,6 +24,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 }
 
+// Полное удаление документа вместе с версией и шаринг-ссылками.
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   const { id } = params;
   if (!id) return new Response('Bad request', { status: 400 });

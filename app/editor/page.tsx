@@ -25,6 +25,7 @@ import {
   AlignJustify,
 } from 'lucide-react';
 
+// Типы, используемые для привязки DOM-элементов редактора к ProseMirror.
 type ViewDesc = {
   node?: { nodeSize: number };
   posBefore?: number;
@@ -37,6 +38,7 @@ type BlockRange = {
   type: string;
 };
 
+// Определяем диапазон блока по DOM-элементу, чтобы подсветить и редактировать его атрибуты.
 function getBlockRangeFromElement(editor: ReturnType<typeof useEditor>, element: HTMLElement | null): BlockRange | null {
   if (!editor || !element) return null;
 
@@ -73,6 +75,7 @@ function getBlockRangeFromElement(editor: ReturnType<typeof useEditor>, element:
 }
 
 export default function EditorPage() {
+  // Расчёт расширений для клиента выполняем один раз.
   const clientExtensions = useMemo(() => createClientExtensions(), []);
   const editor = useEditor({
     extensions: clientExtensions,
@@ -100,6 +103,7 @@ export default function EditorPage() {
   const initialDocumentId = searchParams.get('documentId') ?? undefined;
   const [loadingDocument, setLoadingDocument] = useState(false);
 
+  // Если пришёл идентификатор документа, загружаем его содержимое.
   useEffect(() => {
     if (!editor || !initialDocumentId) return;
     setLoadingDocument(true);
@@ -120,6 +124,7 @@ export default function EditorPage() {
       .finally(() => setLoadingDocument(false));
   }, [editor, initialDocumentId]);
 
+  // Готовые наборы классов для разных видов кнопок панели.
   const pillButtonClass =
     'flex cursor-pointer items-center justify-center gap-2 rounded-[12px] border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-[#F6F6F7] hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 disabled:cursor-not-allowed disabled:opacity-50';
 
@@ -140,6 +145,7 @@ export default function EditorPage() {
   const [selectedBlock, setSelectedBlock] = useState<BlockRange | null>(null);
   const [activeTab, setActiveTab] = useState<'elements' | 'settings'>('elements');
 
+  // Предустановленные палитры для выбора цвета текста.
   const colorOptions = [
     { label: 'Насыщенный', value: '#0f172a' },
     { label: 'Фирменный', value: '#4c1d95' },
@@ -148,8 +154,10 @@ export default function EditorPage() {
     { label: 'Акцент', value: '#dc2626' },
   ];
 
+  // Доступные размеры шрифта для выпадающего списка.
   const fontSizeOptions = ['14px', '16px', '18px', '20px', '24px'];
 
+  // Применяем выбранный цвет, либо сбрасываем, если value пустое.
   const applyColor = (value: string | null) => {
     if (!editor) return;
     if (!value) {
@@ -159,6 +167,7 @@ export default function EditorPage() {
     }
   };
 
+  // Аналогично меняем размер шрифта выбранного текста.
   const applyFontSize = (value: string) => {
     if (!editor) return;
     if (!value) {
@@ -168,6 +177,7 @@ export default function EditorPage() {
     }
   };
 
+  // Универсально обновляем атрибуты текущего блока.
   const updateBlockAttributes = useCallback((attrs: Record<string, unknown>) => {
     if (!editor || !selectedBlock) return;
     const selection = editor.state.selection;
@@ -182,6 +192,7 @@ export default function EditorPage() {
     }
   }, [editor, selectedBlock]);
 
+  // Специальный апдейтер для отступов блока (верх/низ).
   const setPaddingValue = useCallback(
     (key: 'paddingTop' | 'paddingBottom', value: number) => {
       if (!editor || !selectedBlock) return;

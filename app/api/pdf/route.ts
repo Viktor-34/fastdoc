@@ -7,6 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
+  // HTML превращаем в PDF, проверяя, что известен workspace.
   const { html } = await req.json();
   if (!html) return new Response('No HTML', { status: 400 });
 
@@ -16,8 +17,9 @@ export async function POST(req: NextRequest) {
     return new Response('Workspace required', { status: 403 });
   }
 
-  const workspaceId = getActiveWorkspaceId(headerWorkspace ?? cookieWorkspace ?? null);
+  const workspaceId = await getActiveWorkspaceId(headerWorkspace ?? cookieWorkspace ?? null);
 
+  // Используем Playwright Chromium для рендеринга PDF на сервере.
   const { chromium } = await import('playwright');
   const browser = await chromium.launch();
   const page = await browser.newPage();
@@ -34,6 +36,7 @@ export async function POST(req: NextRequest) {
     headers: {
       'content-type':'application/pdf',
       'content-disposition':'attachment; filename="proposal.pdf"',
+      // Возвращаем workspaceId в заголовке, чтобы клиент мог синхронизироваться.
       [WORKSPACE_HEADER]: workspaceId,
     }
   });

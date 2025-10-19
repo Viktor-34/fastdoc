@@ -32,15 +32,19 @@ export function NavDocuments({
     icon: LucideIcon
   }[]
 }) {
+  // Проверяем состояние сайдбара, чтобы корректно выстроить меню на мобильных устройствах.
   const { isMobile } = useSidebar()
 
   return (
+    /* Скрываем группу, когда сайдбар свёрнут до иконок. */
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Documents</SidebarGroupLabel>
       <SidebarMenu>
+        {/* Отрисовываем список документов, пришедший через пропсы. */}
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
+              {/* Переходим по ссылке документа и показываем его иконку. */}
               <a href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
@@ -48,6 +52,7 @@ export function NavDocuments({
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
+                {/* Кнопка с тремя точками открывает меню действий для документа. */}
                 <SidebarMenuAction
                   showOnHover
                   className="rounded-sm data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-neutral-800"
@@ -74,6 +79,7 @@ export function NavDocuments({
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
+          {/* Дополнительный пункт для тех документов, которые не попали в список. */}
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <MoreHorizontalIcon className="text-sidebar-foreground/70" />
             <span>More</span>

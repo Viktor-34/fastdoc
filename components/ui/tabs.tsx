@@ -5,6 +5,7 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
 
+// Контейнер вкладок: задаёт общую обёртку и отступы.
 function Tabs({
   className,
   ...props
@@ -18,6 +19,7 @@ function Tabs({
   )
 }
 
+// Список вкладок (панель кнопок).
 function TabsList({
   className,
   ...props
@@ -34,6 +36,7 @@ function TabsList({
   )
 }
 
+// Одна вкладка-триггер со стилями активного состояния.
 function TabsTrigger({
   className,
   ...props
@@ -50,6 +53,7 @@ function TabsTrigger({
   )
 }
 
+// Область с содержимым текущей вкладки.
 function TabsContent({
   className,
   ...props

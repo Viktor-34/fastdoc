@@ -22,8 +22,10 @@ type ChartContextProps = {
   config: ChartConfig
 }
 
+// Контекст передаёт конфиг цвета/лейблов дочерним компонентам графиков.
 const ChartContext = React.createContext<ChartContextProps | null>(null)
 
+// Хук-помощник для дочерних компонентов тултипа и легенды.
 function useChart() {
   const context = React.useContext(ChartContext)
 
@@ -34,6 +36,7 @@ function useChart() {
   return context
 }
 
+// Обёртка вокруг ResponsiveContainer, добавляет CSS-переменные и конфиг.
 function ChartContainer({
   id,
   className,
@@ -69,6 +72,7 @@ function ChartContainer({
   )
 }
 
+// Генерируем стили для тем: проставляем CSS-переменные под каждый ключ.
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color
@@ -104,6 +108,7 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+// Кастомный тултип, умеет показывать индикаторы и форматировать значения.
 function ChartTooltipContent({
   active,
   payload,
@@ -252,6 +257,7 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend
 
+// Кастомная легенда: отображает иконку/цвет и подпись из конфига.
 function ChartLegendContent({
   className,
   hideIcon = false,
@@ -308,7 +314,7 @@ function ChartLegendContent({
   )
 }
 
-// Helper to extract item config from a payload.
+// Вытаскиваем конфиг элемента из payload тултипа/легенды.
 function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,

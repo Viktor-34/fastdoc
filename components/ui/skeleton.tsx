@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 
+// Простой skeleton-блок для загрузочных состояний.
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

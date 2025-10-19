@@ -1,9 +1,15 @@
-export default function CatalogNewPage() {
+import { ProductForm } from "@/components/product-form";
+import { getActiveWorkspaceId } from "@/lib/workspace";
+
+// Страница создания нового товара каталога.
+export default async function CatalogNewPage() {
+  // Используем активную рабочую область, чтобы привязать товар к ней.
+  const workspaceId = await getActiveWorkspaceId();
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-sm text-slate-600 shadow-sm">
-      <p>
-        Форма создания товара появится здесь позже. Пока добавляйте товары через API или базу данных.
-      </p>
+    <div className="w-full pb-12">
+      {/* Показываем пустую форму, workspaceId нужен для API-запросов. */}
+      <ProductForm workspaceId={workspaceId} />
     </div>
   );
 }

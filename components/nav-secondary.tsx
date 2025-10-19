@@ -22,12 +22,15 @@ export function NavSecondary({
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
+    /* Группа навигации для вторичных разделов (например, быстрых ссылок). */
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
+          {/* Рисуем список ссылок, каждая строка ведёт на свой URL. */}
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
+                {/* Используем <a>, чтобы ссылка вела на внешний/внутренний ресурс. */}
                 <a href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>

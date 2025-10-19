@@ -1,8 +1,10 @@
+// Опции оформления для предпросмотра в iframe.
 export interface PreviewShellOptions {
   padding?: string;
   background?: string;
 }
 
+// Вставляем стили padding/background в <body> готового HTML.
 export function injectPreviewShell(html: string, options: PreviewShellOptions = {}): string {
   const { padding = '24px', background = '#fff' } = options;
 

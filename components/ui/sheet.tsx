@@ -6,28 +6,33 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Корневой компонент Radix Sheet: хранит состояние и порталы.
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
 
+// Кнопка/элемент, который открывает Sheet.
 function SheetTrigger({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
 }
 
+// Кнопка закрытия (можно использовать внутри контента).
 function SheetClose({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Close>) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
 }
 
+// Портал, чтобы рендерить модалку вне текущей иерархии.
 function SheetPortal({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
 }
 
+// Полупрозрачный фон за модалкой.
 function SheetOverlay({
   className,
   ...props
@@ -44,6 +49,7 @@ function SheetOverlay({
   )
 }
 
+// Основной контейнер контента: умеет появляться с разных сторон.
 function SheetContent({
   className,
   children,
@@ -81,6 +87,7 @@ function SheetContent({
   )
 }
 
+// Шапка: обычно для заголовка и описания.
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -91,6 +98,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Нижняя часть, где располагаются кнопки действий.
 function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -101,6 +109,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Заголовок внутри шапки.
 function SheetTitle({
   className,
   ...props
@@ -114,6 +123,7 @@ function SheetTitle({
   )
 }
 
+// Краткое описание под заголовком.
 function SheetDescription({
   className,
   ...props

@@ -1,6 +1,7 @@
 import Image from '@tiptap/extension-image';
 import { applyPaddingToNodeHTMLAttributes, paddingAttributeConfig } from './paddingNodes';
 
+// Расширение блока изображения: добавляет padding, aspect ratio и ссылку.
 export const ImageBlock = Image.extend({
   draggable: true,
   inline: false,

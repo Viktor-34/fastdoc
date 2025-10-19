@@ -5,30 +5,35 @@ import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
 
+// Корневой компонент Vaul Drawer.
 function Drawer({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />
 }
 
+// Элемент, который открывает дровер.
 function DrawerTrigger({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
   return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />
 }
 
+// Портал для рендера дровера вне корневого дерева.
 function DrawerPortal({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
   return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />
 }
 
+// Кнопка закрытия дровера.
 function DrawerClose({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
   return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />
 }
 
+// Полупрозрачный фон под модалкой.
 function DrawerOverlay({
   className,
   ...props
@@ -45,6 +50,7 @@ function DrawerOverlay({
   )
 }
 
+// Основная панель, поддерживает разные направления открытия.
 function DrawerContent({
   className,
   children,
@@ -72,6 +78,7 @@ function DrawerContent({
   )
 }
 
+// Шапка дровера.
 function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -85,6 +92,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Подвал с кнопками/действиями.
 function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -95,6 +103,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Заголовок внутри шапки.
 function DrawerTitle({
   className,
   ...props
@@ -108,6 +117,7 @@ function DrawerTitle({
   )
 }
 
+// Текстовое описание под заголовком.
 function DrawerDescription({
   className,
   ...props

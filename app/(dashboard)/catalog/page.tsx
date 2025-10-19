@@ -1,22 +1,24 @@
-import Link from "next/link";
 import { Box, Clock, Layers, TrendingUp } from "lucide-react";
 
 import CatalogTable from "@/components/CatalogTable";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
-import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db/prisma";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 
+// Страница каталога с перечнем товаров и сводной статистикой.
 export default async function CatalogPage() {
-  const workspaceId = getActiveWorkspaceId();
+  // Определяем текущую рабочую область, чтобы фильтровать данные.
+  const workspaceId = await getActiveWorkspaceId();
 
+  // Загружаем товары этой рабочей области с расшифровкой цен.
   const products = await prisma.product.findMany({
     where: { workspaceId },
     include: { priceItems: true },
     orderBy: { updatedAt: "desc" },
   });
 
+  // Приводим данные к формату, удобному для клиентской части.
   const serialized = products.map((product) => ({
     id: product.id,
     name: product.name,
@@ -27,6 +29,7 @@ export default async function CatalogPage() {
     updatedAt: product.updatedAt.toISOString(),
   }));
 
+  // Рассчитываем агрегаты для карточек статистики.
   const now = Date.now();
   const MS_PER_DAY = 1000 * 60 * 60 * 24;
   const updatedLast7Days = serialized.filter(
@@ -76,14 +79,11 @@ export default async function CatalogPage() {
         label="Каталог"
         title="Каталог товаров"
         description="Используйте готовые позиции для блока «Таблица цен»."
-        actions={
-          <Button asChild variant="outline" size="sm">
-            <Link href="/catalog/new">Добавить товар</Link>
-          </Button>
-        }
       />
       <main className="mx-auto flex w-full flex-1 flex-col gap-6 bg-white px-4 pb-10 pt-6 md:px-6">
+        {/* Плашки с ключевыми показателями. */}
         <SectionCards cards={statsCards} />
+        {/* Таблица товаров с поиском. */}
         <CatalogTable initialProducts={serialized} />
       </main>
     </div>

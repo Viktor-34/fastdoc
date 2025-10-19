@@ -5,6 +5,7 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
+// Обёртка Radix Avatar с базовым размером и скруглением.
 function Avatar({
   className,
   ...props
@@ -21,6 +22,7 @@ function Avatar({
   )
 }
 
+// Основное изображение аватара.
 function AvatarImage({
   className,
   ...props
@@ -34,6 +36,7 @@ function AvatarImage({
   )
 }
 
+// Фоллбек, когда картинка не загрузилась (инициалы/иконка).
 function AvatarFallback({
   className,
   ...props

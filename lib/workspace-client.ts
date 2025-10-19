@@ -1,4 +1,4 @@
-"use client";
+продолжай сам"use client";
 
 import {
   DEFAULT_WORKSPACE_ID,
@@ -6,6 +6,7 @@ import {
   WORKSPACE_HEADER,
 } from "./workspace-constants";
 
+// Преобразуем строку куки в объект ключ-значение.
 function parseCookies(source: string) {
   return source.split(";").reduce<Record<string, string>>((acc, part) => {
     const [rawKey, ...rawValue] = part.split("=");
@@ -22,6 +23,7 @@ function parseCookies(source: string) {
   }, {});
 }
 
+// Получаем workspaceId из клиентских cookies.
 export function getClientWorkspaceId(cookieString?: string) {
   if (typeof document === "undefined" && !cookieString) return null;
   const source = cookieString ?? document.cookie ?? "";
@@ -30,6 +32,7 @@ export function getClientWorkspaceId(cookieString?: string) {
   return value && value.length > 0 ? value : null;
 }
 
+// Сохраняем workspaceId в куку с безопасными атрибутами.
 export function setClientWorkspaceId(workspaceId: string, options?: { maxAgeSeconds?: number }) {
   if (typeof document === "undefined") return;
   const sanitized = workspaceId.trim() || DEFAULT_WORKSPACE_ID;
@@ -40,6 +43,7 @@ export function setClientWorkspaceId(workspaceId: string, options?: { maxAgeSeco
   document.cookie = `${WORKSPACE_COOKIE}=${encodeURIComponent(sanitized)}; ${attributes.join("; ")}`;
 }
 
+// Добавляем заголовок workspaceId ко всем fetch-запросам с клиента.
 export function withWorkspaceHeader(init?: RequestInit) {
   const workspaceId = getClientWorkspaceId();
   if (!workspaceId) return init ?? {};

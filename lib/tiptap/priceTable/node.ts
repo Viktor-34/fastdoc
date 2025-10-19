@@ -1,8 +1,10 @@
 import { Node } from '@tiptap/core';
 import { paddingAttributeConfig, applyPaddingToNodeHTMLAttributes } from '../paddingNodes';
 
+// Строка прайс-таблицы: название, количество, цена и скидка.
 export type PriceRow = { name: string; qty: number; price: number; discount: number };
 
+// Node для статического рендера таблицы цен (используется на сервере).
 export const PriceTableNode = Node.create({
   name: 'priceTable',
   group: 'block',

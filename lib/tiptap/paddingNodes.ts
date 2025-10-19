@@ -5,14 +5,17 @@ import OrderedList from '@tiptap/extension-ordered-list';
 import CodeBlock from '@tiptap/extension-code-block';
 import type { Attributes } from '@tiptap/core';
 
+// Значения отступов по умолчанию, которые пробрасываем в узлы.
 type PaddingDefaults = { top: number; bottom: number };
 
+// Вытаскиваем числовое значение из строки вида "12px".
 function parsePx(value: string | null | undefined): number {
   if (!value) return 0;
   const match = value.match(/-?\d+(?:\.\d+)?/);
   return match ? Number.parseFloat(match[0]) : 0;
 }
 
+// Приводим переданное значение к числу или возвращаем fallback.
 function coercePadding(value: unknown, fallback: number): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (typeof value === 'string') {
@@ -22,6 +25,7 @@ function coercePadding(value: unknown, fallback: number): number {
   return fallback;
 }
 
+// Собираем CSS-строку, сбрасываем margin и добавляем padding.
 function buildStyle(styleValue: unknown, top: number, bottom: number) {
   const parts: string[] = [];
   if (typeof styleValue === 'string' && styleValue.trim().length > 0) {
@@ -37,6 +41,7 @@ function buildStyle(styleValue: unknown, top: number, bottom: number) {
   return parts.join(';');
 }
 
+// Удаляем paddingTop/paddingBottom из атрибутов и переносим в style.
 function stripPaddingAttributes<T extends Record<string, any>>(HTMLAttributes: T, defaults: PaddingDefaults) {
   const { paddingTop, paddingBottom, style, ...rest } = HTMLAttributes;
   const topValue = coercePadding(paddingTop, defaults.top);
@@ -45,6 +50,7 @@ function stripPaddingAttributes<T extends Record<string, any>>(HTMLAttributes: T
   return { attrs: rest, style: mergedStyle };
 }
 
+// Конфиг атрибутов для Tiptap node (умеет парсить из HTML).
 function paddingAttributes(defaults: PaddingDefaults) {
   return {
     paddingTop: {
@@ -66,6 +72,7 @@ function paddingAttributes(defaults: PaddingDefaults) {
 
 const DEFAULT_TEXT_PADDING: PaddingDefaults = { top: 8, bottom: 8 };
 
+// Параграф с управляемым padding.
 export const ParagraphWithPadding = Paragraph.extend({
   addAttributes() {
     return {
@@ -79,6 +86,7 @@ export const ParagraphWithPadding = Paragraph.extend({
   },
 });
 
+// Заголовок с padding.
 export const HeadingWithPadding = Heading.extend({
   addAttributes() {
     return {
@@ -95,6 +103,7 @@ export const HeadingWithPadding = Heading.extend({
   },
 });
 
+// Маркированный список с padding.
 export const BulletListWithPadding = BulletList.extend({
   addAttributes() {
     return {
@@ -108,6 +117,7 @@ export const BulletListWithPadding = BulletList.extend({
   },
 });
 
+// Нумерованный список с padding.
 export const OrderedListWithPadding = OrderedList.extend({
   addAttributes() {
     return {
@@ -121,6 +131,7 @@ export const OrderedListWithPadding = OrderedList.extend({
   },
 });
 
+// Кодовый блок с padding и поддержкой языка.
 export const CodeBlockWithPadding = CodeBlock.extend({
   addAttributes() {
     return {
@@ -144,6 +155,7 @@ export function applyPaddingToNodeHTMLAttributes(HTMLAttributes: Record<string, 
   return { attrs, style };
 }
 
+// Вспомогательная функция для других расширений.
 export function paddingAttributeConfig(defaultTop = 8, defaultBottom = 8): Attributes {
   return paddingAttributes({ top: defaultTop, bottom: defaultBottom });
 }

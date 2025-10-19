@@ -5,6 +5,7 @@ import type { Prisma } from '@prisma/client';
 
 export const runtime = 'nodejs';
 
+// Приводим числовые поля Prisma к обычным number и сериализуем позиции.
 function serializeProduct(product: Prisma.ProductGetPayload<{ include: { priceItems: true } }>) {
   return {
     ...product,
@@ -18,7 +19,8 @@ function serializeProduct(product: Prisma.ProductGetPayload<{ include: { priceIt
 }
 
 export async function GET(req: NextRequest) {
-  const workspaceId = getActiveWorkspaceId(req.nextUrl.searchParams.get('workspaceId'));
+  // Подмешиваем активную рабочую область (из запроса или куки).
+  const workspaceId = await getActiveWorkspaceId(req.nextUrl.searchParams.get('workspaceId'));
   const products = await prisma.product.findMany({
     where: { workspaceId },
     include: { priceItems: true },
@@ -44,7 +46,7 @@ type ProductCreateBody = {
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as ProductCreateBody;
-  const workspaceId = getActiveWorkspaceId(body.workspaceId);
+  const workspaceId = await getActiveWorkspaceId(body.workspaceId);
   if (!body?.name || typeof body.basePrice !== 'number') {
     return new Response('name and basePrice required', { status: 400 });
   }
@@ -96,7 +98,8 @@ export async function PUT(req: NextRequest) {
     (await req.json()) as ProductUpdateBody;
   if (!id) return new Response('id required', { status: 400 });
 
-  const workspaceId = getActiveWorkspaceId(workspaceOverride);
+  // Убеждаемся, что пользователь работает в рамках своей рабочей области.
+  const workspaceId = await getActiveWorkspaceId(workspaceOverride);
 
   const existingProduct = await prisma.product.findUnique({ where: { id } });
   if (!existingProduct || existingProduct.workspaceId !== workspaceId) {
@@ -120,6 +123,7 @@ export async function PUT(req: NextRequest) {
       if (deleteIds.length) {
         await tx.priceItem.deleteMany({ where: { id: { in: deleteIds } } });
       }
+      // Обновляем или создаём позиции по списку, синхронизируя таблицу.
       for (const item of priceItems) {
         if (item.id) {
           await tx.priceItem.update({
@@ -161,7 +165,8 @@ export async function DELETE(req: NextRequest) {
   const { id } = (await req.json()) as ProductDeleteBody;
   if (!id) return new Response('id required', { status: 400 });
 
-  const workspaceId = getActiveWorkspaceId();
+  // Проверяем принадлежность записи текущему workspace перед удалением.
+  const workspaceId = await getActiveWorkspaceId();
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing || existing.workspaceId !== workspaceId) {
     return new Response('not found', { status: 404 });

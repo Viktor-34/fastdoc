@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import "@/styles/preview.css";
 
+// Подключаем семейства шрифтов Geist (основной и моноширинный).
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
   description: "Коммерческие предложения: редактор, предпросмотр, PDF, публичные ссылки",
 };
 
+// Базовый layout приложения: задаёт язык, фон и подключает шрифты.
 export default function RootLayout({
   children,
 }: Readonly<{

@@ -18,6 +18,7 @@ import {
 } from './paddingNodes';
 import type { AnyExtension } from '@tiptap/core';
 
+// Набор клиентских расширений Tiptap: включает визуальные блоки.
 export function createClientExtensions(): AnyExtension[] {
   return [
     StarterKit.configure({
@@ -44,6 +45,7 @@ export function createClientExtensions(): AnyExtension[] {
   ];
 }
 
+// Серверный набор (без PriceTable view, но с node), нужен для рендера HTML.
 export function createServerExtensions(): AnyExtension[] {
   return [
     StarterKit.configure({

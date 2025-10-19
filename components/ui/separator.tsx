@@ -5,6 +5,7 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
 import { cn } from "@/lib/utils"
 
+// Универсальный разделитель: поддерживает горизонтальное/вертикальное отображение.
 function Separator({
   className,
   orientation = "horizontal",

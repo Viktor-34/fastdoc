@@ -1,6 +1,7 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 import { paddingAttributeConfig, applyPaddingToNodeHTMLAttributes } from './paddingNodes';
 
+// Добавляем команды spacer в API Tiptap.
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     spacer: {
@@ -11,6 +12,7 @@ declare module '@tiptap/core' {
   }
 }
 
+// Узел Spacer: вставляет пустой блок или разделитель.
 export const Spacer = Node.create({
   name: 'spacer',
   group: 'block',

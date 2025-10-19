@@ -1,4 +1,5 @@
 .page {
+  /* Базовые цвета и прозрачности для светлой темы. */
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
   --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
@@ -18,6 +19,7 @@
 
 @media (prefers-color-scheme: dark) {
   .page {
+    /* Подстраиваем палитру для тёмного режима. */
     --gray-rgb: 255, 255, 255;
     --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
     --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
@@ -28,6 +30,7 @@
 }
 
 .main {
+  /* Колонка основных шагов/описания на главной странице. */
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -57,6 +60,7 @@
 }
 
 .ctas {
+  /* Блок кнопок призыва к действию. */
   display: flex;
   gap: 16px;
 }
@@ -92,6 +96,7 @@ a.secondary {
 }
 
 .footer {
+  /* Нижняя зона с ссылками. */
   grid-row-start: 3;
   display: flex;
   gap: 24px;

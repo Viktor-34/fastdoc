@@ -7,6 +7,7 @@ import { type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { toggleVariants } from "@/components/ui/toggle"
 
+// Контекст хранит общий variant/size для элементов группы.
 const ToggleGroupContext = React.createContext<
   VariantProps<typeof toggleVariants>
 >({
@@ -14,6 +15,7 @@ const ToggleGroupContext = React.createContext<
   variant: "default",
 })
 
+// Контейнер группы переключателей, передаёт стили через контекст.
 function ToggleGroup({
   className,
   variant,
@@ -40,6 +42,7 @@ function ToggleGroup({
   )
 }
 
+// Отдельная кнопка внутри группы (наследует variant/size).
 function ToggleGroupItem({
   className,
   children,

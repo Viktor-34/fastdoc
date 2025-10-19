@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 
+// Статичный список ссылок, которые показываем в боковой навигации.
 const NAV_ITEMS = [
   {
     title: "Список предложений",
@@ -35,12 +36,16 @@ const NAV_ITEMS = [
   },
 ]
 
+// Основной сайдбар приложения со статичными ссылками и кнопкой создания документа.
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // Получаем текущий путь, чтобы подсветить активный пункт меню.
   const pathname = usePathname()
 
   return (
+    /* Сайдбар умеет скрываться на мобильных устройствах (offcanvas-режим). */
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
+        {/* Верхняя часть с логотипом/названием приложения. */}
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -58,6 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Навигация</SidebarGroupLabel>
           <SidebarMenu>
             {NAV_ITEMS.map((item) => {
+              // Для главной страницы сравниваем точное совпадение, для остальных — по префиксу.
               const isActive =
                 item.href === "/"
                   ? pathname === "/"
@@ -65,6 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
               return (
                 <SidebarMenuItem key={item.href}>
+                  {/* Оборачиваем кнопку в Link, чтобы переходить по маршруту Next.js. */}
                   <SidebarMenuButton
                     asChild
                     tooltip={item.title}
@@ -81,6 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      {/* Нижняя зона с кнопкой для создания нового документа. */}
       <SidebarFooter className="border-t border-sidebar-border px-4 py-4">
         <Button asChild size="sm" className="w-full justify-center gap-2">
           <Link href="/editor">

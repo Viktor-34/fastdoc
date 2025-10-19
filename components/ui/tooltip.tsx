@@ -5,6 +5,7 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
+// Провайдер тултипа: позволяет переопределять задержку показа.
 function TooltipProvider({
   delayDuration = 0,
   ...props
@@ -18,6 +19,7 @@ function TooltipProvider({
   )
 }
 
+// Упрощённый компонент тултипа с провайдером по умолчанию.
 function Tooltip({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
@@ -28,12 +30,14 @@ function Tooltip({
   )
 }
 
+// Элемент, наведение на который вызывает тултип.
 function TooltipTrigger({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
 }
 
+// Сам пузырь подсказки со стрелкой.
 function TooltipContent({
   className,
   sideOffset = 0,

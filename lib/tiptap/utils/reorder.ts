@@ -1,8 +1,10 @@
 import type { Node as ProseMirrorNode } from 'prosemirror-model';
 import type { Transaction } from 'prosemirror-state';
 
+// Направление перетаскивания блока.
 export type ReorderDirection = 'up' | 'down';
 
+// Параметры для функции reorderBlock.
 export interface ReorderParams {
   tr: Transaction;
   from: number;
@@ -10,6 +12,7 @@ export interface ReorderParams {
   direction: ReorderDirection;
 }
 
+// Возвращает позицию перед дочерним узлом под индексом.
 const getPosBeforeIndex = (doc: ProseMirrorNode, index: number): number => {
   if (index <= 0) return 0;
   let pos = 0;
@@ -20,12 +23,14 @@ const getPosBeforeIndex = (doc: ProseMirrorNode, index: number): number => {
   return pos;
 };
 
+// Возвращает позицию после дочернего узла под индексом.
 const getPosAfterIndex = (doc: ProseMirrorNode, index: number): number => {
   if (index < 0) return 0;
   const bounded = Math.min(index, doc.childCount - 1);
   return getPosBeforeIndex(doc, bounded + 1);
 };
 
+// Перемещает блок вверх/вниз в пределах документа.
 export function reorderBlock({ tr, from, to, direction }: ReorderParams): Transaction | null {
   const doc = tr.doc;
   const positions: number[] = [];

@@ -42,8 +42,10 @@ type SidebarContextProps = {
   toggleSidebar: () => void
 }
 
+// Контекст хранит текущее состояние сайдбара (режим, открытие, мобильность).
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
 
+// Хук-помощник для компонентов, которым нужно знать состояние сайдбара.
 function useSidebar() {
   const context = React.useContext(SidebarContext)
   if (!context) {
@@ -53,6 +55,7 @@ function useSidebar() {
   return context
 }
 
+// Провайдер управляет состоянием сайдбара, синхронизирует его через куку и шорткат.
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -69,8 +72,7 @@ function SidebarProvider({
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
 
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
+  // Внутреннее состояние сайдбара; внешние пропсы позволяют контролировать его снаружи.
   const [_open, _setOpen] = React.useState(defaultOpen)
   const open = openProp ?? _open
   const setOpen = React.useCallback(
@@ -82,18 +84,18 @@ function SidebarProvider({
         _setOpen(openState)
       }
 
-      // This sets the cookie to keep the sidebar state.
+      // Сохраняем состояние в cookie, чтобы восстановить его при следующей загрузке.
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
     },
     [setOpenProp, open]
   )
 
-  // Helper to toggle the sidebar.
+  // Переключатель учитывает мобильный режим: открываем sheet вместо боковой панели.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
 
-  // Adds a keyboard shortcut to toggle the sidebar.
+  // Добавляем горячую клавишу (Cmd/Ctrl + B), чтобы быстро свернуть панель.
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -109,8 +111,7 @@ function SidebarProvider({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [toggleSidebar])
 
-  // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
+  // Устанавливаем data-state для удобной стилизации (expanded/collapsed).
   const state = open ? "expanded" : "collapsed"
 
   const contextValue = React.useMemo<SidebarContextProps>(
@@ -151,6 +152,7 @@ function SidebarProvider({
   )
 }
 
+// Основной контейнер sidebar: умеет работать как offcanvas, icon или статичный режим.
 function Sidebar({
   side = "left",
   variant = "sidebar",

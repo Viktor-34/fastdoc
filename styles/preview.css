@@ -1,7 +1,14 @@
+/* Обёртка предпросмотра, создаёт нейтральный фон и отступы вокруг страницы. */
 .public-preview { min-height:100vh; padding:40px 16px 72px; background:#F7F7F5; }
+
+/* Контейнер печатной страницы, имитирует лист A4 и центрирует его. */
 .public-preview .page { width:min(210mm, 100%); max-width:210mm; min-height:297mm; padding:32px; margin:0 auto 32px; background:#ffffff; border-radius:20px; box-shadow:0 24px 48px -32px rgba(15,23,42,0.25); box-sizing:border-box; }
+
+/* Оформление кнопки скачивания, чтобы пользователь быстро забрал документ. */
 .public-preview .download-button { display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:12px; border:1px solid #3C323E; background:#3C323E; color:#ffffff; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s ease,border-color .2s ease; }
 .public-preview .download-button:hover { background:#655D67; border-color:#655D67; }
+
+/* Сбрасываем стандартные отступы браузера для всех элементов внутри страницы. */
 .public-preview .page *,
 .page * {
   font-family: inherit;
@@ -11,6 +18,8 @@
   margin-inline-start: 0 !important;
   margin-inline-end: 0 !important;
 }
+
+/* Базовая типографика для заголовков, абзацев и списков на странице. */
 .public-preview .page p { margin:0; color:#1f2937; }
 .public-preview .page h1 { margin:0; color:#111827; font-weight:600; font-size:2rem; line-height:1.2; }
 .public-preview .page h2 { margin:0; color:#111827; font-weight:600; font-size:1.75rem; line-height:1.25; }
@@ -20,8 +29,11 @@
 .public-preview .page ol { list-style:decimal; margin:0; padding-left:1.5rem; }
 .public-preview .page li { margin:0; }
 .public-preview .page li p { margin:0; }
+/* Двухколоночная сетка для блоков с содержимым внутри документа. */
 .public-preview .two-columns,
 .page .two-columns { display:grid; gap:24px; padding:24px; margin:0; background:#ffffff; border-radius:16px; box-shadow:0 1px 3px rgba(15,23,42,0.08); grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+/* Настройки колонок и вертикальных промежутков между элементами. */
 .public-preview .two-columns__column,
 .page .two-columns__column { display:flex; flex-direction:column; gap:16px; }
 .public-preview .two-columns__column p:last-child,
@@ -34,19 +46,29 @@
 .page .two-columns__column h3,
 .public-preview .two-columns__column h4,
 .page .two-columns__column h4 { margin-top:0; }
+
+/* Оформление блоков кода, чтобы сниппеты выделялись моноширинным шрифтом. */
 .public-preview .page pre { background:#0f172a; color:#f8fafc; padding:16px; border-radius:12px; font-size:14px; overflow-x:auto; margin:0; }
 .public-preview .page code { font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace; }
+
+/* Пробельные блоки, которые добавляют отступы или разделители между секциями. */
 .public-preview .spacer-block { border:none; background:transparent; }
 .public-preview .spacer-block::after { content:''; }
 .public-preview .spacer-block[data-variant='empty'] { height:var(--spacer-size,24px); margin:12px 0; background:rgba(148,163,184,0.2); border-radius:8px; }
 .public-preview .spacer-block[data-variant='divider-solid'] { border-top:1px solid #D0D5DD; margin:24px 0; }
 .public-preview .spacer-block[data-variant='divider-dashed'] { border-top:1px dashed #D0D5DD; margin:24px 0; }
+
+/* Блок с изображением, растягивающийся по ширине и сохраняющий скругления. */
 .public-preview .image-block { position:relative; padding:0; border:none; background:transparent; margin:0; width:100%; overflow:hidden; }
 .public-preview .image-block img { display:block; border-radius:16px; object-fit:cover; }
+
+/* На маленьких экранах превращаем сетку из двух колонок в одну. */
 @media (max-width:768px) {
   .public-preview .two-columns,
   .page .two-columns { grid-template-columns:1fr; }
 }
+
+/* Настройки для печати, чтобы страница корректно экспортировалась в PDF или на бумагу. */
 @media print {
   body { background:white; }
   .page { box-shadow:none; }

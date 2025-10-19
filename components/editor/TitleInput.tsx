@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from 'react';
 
+/* Свойства поля заголовка: стартовое значение и обработчик изменения. */
 interface TitleInputProps {
   initialTitle?: string;
   onChange: (value: string) => void;
 }
 
+// Поле ввода заголовка документа в редакторе.
 export default function TitleInput({ initialTitle = '', onChange }: TitleInputProps) {
   const [value, setValue] = useState(initialTitle);
 
+  // Следим за обновлением внешнего значения и синхронизируем стейт.
   useEffect(() => setValue(initialTitle), [initialTitle]);
 
   return (
@@ -17,6 +20,7 @@ export default function TitleInput({ initialTitle = '', onChange }: TitleInputPr
       type="text"
       value={value}
       onChange={(event) => {
+        // Обновляем локальный стейт и уведомляем родителя о новом заголовке.
         setValue(event.target.value);
         onChange(event.target.value);
       }}

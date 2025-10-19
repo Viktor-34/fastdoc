@@ -8,7 +8,9 @@ import { injectPreviewShell } from '@/lib/preview/shell';
 import { writePreviewPayload } from '@/lib/preview/storage';
 import { withWorkspaceHeader } from '@/lib/workspace-client';
 
+// Хук с командами редактора: добавление блоков, экспорт PDF, предпросмотр.
 export function useEditorCommands(editor: Editor | null) {
+  // Вставляем блок(и) контента в конец документа и скроллим к ним.
   const appendBlock = useCallback((content: JSONContent | JSONContent[]) => {
     if (!editor) return;
     const transaction = editor
@@ -26,6 +28,7 @@ export function useEditorCommands(editor: Editor | null) {
     });
   }, [editor]);
 
+  // Формируем HTML и отправляем его на сервер для генерации PDF.
   const exportPdf = useCallback(async () => {
     if (!editor) return;
     const json = editor.getJSON();
@@ -51,6 +54,7 @@ export function useEditorCommands(editor: Editor | null) {
     URL.revokeObjectURL(url);
   }, [editor]);
 
+  // Сохраняем HTML предпросмотра и открываем окно с локальным preview.
   const openPreview = useCallback(() => {
     if (!editor) return;
     const json = editor.getJSON();

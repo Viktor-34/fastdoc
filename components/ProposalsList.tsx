@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Link2, Loader2, Trash2 } from "lucide-react";
 
@@ -8,18 +8,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 
-interface DocumentItem {
+// Описание одного документа в списке.
+export type DocumentItem = {
   id: string;
   title: string;
   createdAt: string;
   updatedAt: string;
   updatedBy: string | null;
-}
+};
 
 interface ProposalsListProps {
   initialDocuments: DocumentItem[];
+  query?: string;
 }
 
+// Утилита для копирования ссылки в буфер (с запасным вариантом для старых браузеров).
 const copyToClipboard = async (value: string) => {
   const fallback = () => {
     const textarea = document.createElement("textarea");
@@ -48,12 +51,14 @@ const copyToClipboard = async (value: string) => {
   fallback();
 };
 
-export default function ProposalsList({ initialDocuments }: ProposalsListProps) {
+// Список предложений: фильтрация по запросу, копирование ссылок и удаление.
+export default function ProposalsList({ initialDocuments, query = "" }: ProposalsListProps) {
   const [documents, setDocuments] = useState(initialDocuments);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copyingId, setCopyingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Удаляем документ и обновляем локальный список.
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
@@ -70,6 +75,7 @@ export default function ProposalsList({ initialDocuments }: ProposalsListProps) 
     }
   };
 
+  // Запрашиваем временную ссылку и копируем её в буфер обмена.
   const handleCopyLink = async (id: string) => {
     try {
       setCopyingId(id);
@@ -94,6 +100,15 @@ export default function ProposalsList({ initialDocuments }: ProposalsListProps) 
     }
   };
 
+  const filtered = useMemo(() => {
+    const value = query.trim().toLowerCase();
+    if (!value) return documents;
+    return documents.filter((doc) =>
+      [doc.title, doc.updatedBy ?? ""].some((field) => field.toLowerCase().includes(value)),
+    );
+  }, [documents, query]);
+
+  // Если документов совсем нет, показываем заглушку с кнопкой создания.
   if (documents.length === 0) {
     return (
       <Card className="border border-dashed p-0">
@@ -114,9 +129,18 @@ export default function ProposalsList({ initialDocuments }: ProposalsListProps) 
     );
   }
 
+  // Если список есть, но запрос ничего не нашёл, выводим подсказку.
+  if (filtered.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-neutral-200 bg-white px-6 py-8 text-center text-sm text-neutral-500">
+        Ничего не найдено. Попробуйте изменить запрос.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      {documents.map((doc) => {
+      {filtered.map((doc) => {
         const isDeleting = deletingId === doc.id;
         const isCopying = copyingId === doc.id;
         const isCopied = copiedId === doc.id;
@@ -129,6 +153,7 @@ export default function ProposalsList({ initialDocuments }: ProposalsListProps) 
             <CardContent className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-2">
                 <CardTitle className="text-base font-semibold text-neutral-900">
+                  {/* Заголовок ведёт в редактор с выбранным документом. */}
                   <Link
                     href={`/editor?documentId=${doc.id}`}
                     className="transition-colors hover:text-neutral-700"
@@ -140,12 +165,14 @@ export default function ProposalsList({ initialDocuments }: ProposalsListProps) 
                   <span>
                     Обновлено: {new Date(doc.updatedAt).toLocaleDateString("ru-RU")}
                   </span>
+                  {/* Показываем клиента, если он указан. */}
                   <Badge variant="outline" className="bg-neutral-100/70">
                     {doc.updatedBy ? `Клиент: ${doc.updatedBy}` : "Клиент: —"}
                   </Badge>
                 </div>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                {/* Кнопка копирования публичной ссылки: меняет текст в зависимости от состояния. */}
                 <Button
                   type="button"
                   variant="outline"
@@ -163,6 +190,7 @@ export default function ProposalsList({ initialDocuments }: ProposalsListProps) 
                     {isCopied ? "Скопировано" : isCopying ? "Копируем…" : "Скопировать ссылку"}
                   </span>
                 </Button>
+                {/* Кнопка удаления документа с анимацией загрузки. */}
                 <Button
                   type="button"
                   variant="ghost"

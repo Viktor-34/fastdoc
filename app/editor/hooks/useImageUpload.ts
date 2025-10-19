@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import type { Editor } from '@tiptap/react';
 import type { JSONContent } from '@tiptap/core';
 
+// Запрос на загрузку файла изображения -> получаем URL от бэкенда.
 export async function uploadImageRequest(file: File): Promise<string> {
   const formData = new FormData();
   formData.append('file', file);
@@ -13,6 +14,7 @@ export async function uploadImageRequest(file: File): Promise<string> {
   return data.url as string;
 }
 
+// Определяем исходные размеры картинки по URL, чтобы вставить верно.
 async function readImageSize(url: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new window.Image();
@@ -22,9 +24,12 @@ async function readImageSize(url: string): Promise<{ width: number; height: numb
   });
 }
 
+// Хук интеграции загрузки изображений в редактор.
 export function useImageUpload(editor: Editor | null, appendBlock: (content: JSONContent | JSONContent[]) => void) {
+  // Флаг, показывающий активную загрузку (можно отобразить спиннер).
   const [isUploading, setIsUploading] = useState(false);
 
+  // Общая логика аплоада: отправляем файл, узнаём размеры, возвращаем метаданные.
   const uploadImage = useCallback(async (file: File) => {
     setIsUploading(true);
     try {
@@ -36,6 +41,7 @@ export function useImageUpload(editor: Editor | null, appendBlock: (content: JSO
     }
   }, []);
 
+  // Вставляем новое изображение в документ в виде блока.
   const insertImageFromFile = useCallback(async (file: File) => {
     if (!editor) return;
     try {
@@ -50,6 +56,7 @@ export function useImageUpload(editor: Editor | null, appendBlock: (content: JSO
     }
   }, [appendBlock, editor, uploadImage]);
 
+  // Заменяем существующий блок изображения новым файлом.
   const replaceImageFromFile = useCallback(
     async (range: { from: number; to: number }, file: File) => {
       if (!editor) return;

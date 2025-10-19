@@ -1,6 +1,7 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 import { paddingAttributeConfig, applyPaddingToNodeHTMLAttributes } from './paddingNodes';
 
+// Добавляем команду twoColumns в Tiptap.
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     twoColumns: {
@@ -9,6 +10,7 @@ declare module '@tiptap/core' {
   }
 }
 
+// Один столбец из двух: хранит индекс и padding.
 export const TwoColumn = Node.create({
   name: 'twoColumn',
   group: 'block',
@@ -45,6 +47,7 @@ export const TwoColumn = Node.create({
   },
 });
 
+// Контейнер двух колонок, содержит ровно два TwoColumn.
 export const TwoColumns = Node.create({
   name: 'twoColumns',
   group: 'block',
@@ -84,4 +87,5 @@ export const TwoColumns = Node.create({
   },
 });
 
+// Экспортируем массив расширений для подключения в редактор.
 export const createTwoColumnExtensions = () => [TwoColumns, TwoColumn];

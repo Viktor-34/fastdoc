@@ -9,12 +9,14 @@ export const runtime = 'nodejs';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
 
+// Приводим строку к безопасному виду для имени папки/файла.
 function sanitizeSegment(value: string) {
   return value.replace(/[^a-z0-9\-_.]/gi, '_');
 }
 
 export async function POST(request: NextRequest) {
-  const workspaceId = getActiveWorkspaceId();
+  // Каждая рабочая область получает свою подпапку.
+  const workspaceId = await getActiveWorkspaceId();
   const workspaceSegment = sanitizeSegment(workspaceId);
   const workspaceDir = path.join(UPLOAD_DIR, workspaceSegment);
 
@@ -27,6 +29,7 @@ export async function POST(request: NextRequest) {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
+  // Создаём директорию при необходимости и сохраняем файл.
   await mkdir(workspaceDir, { recursive: true });
   const safeName = file.name.replace(/[^a-z0-9.\-_]+/gi, '_');
   const fileName = `${randomUUID()}_${safeName}`;

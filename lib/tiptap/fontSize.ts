@@ -1,5 +1,6 @@
 import { Extension } from '@tiptap/core';
 
+// Расширяем команды Tiptap для работы с размером шрифта.
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     fontSize: {
@@ -9,6 +10,7 @@ declare module '@tiptap/core' {
   }
 }
 
+// Расширение, которое хранит font-size в textStyle и добавляет команды.
 export const FontSize = Extension.create({
   name: 'fontSize',
 

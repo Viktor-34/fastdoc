@@ -1,17 +1,18 @@
-import Link from "next/link";
 import { Clock, TrendingUp, Users } from "lucide-react";
 
-import ProposalsList from "@/components/ProposalsList";
+import { ProposalsBoard } from "@/components/proposals-board";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
-import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db/prisma";
 
+// Главная страница: обзор документов и сводная статистика.
 export default async function HomePage() {
+  // Получаем документы из базы, сортируя по дате обновления.
   const documents = await prisma.document.findMany({
     orderBy: { updatedAt: "desc" },
   });
 
+  // Приводим Prisma-модели к сериализуемому формату.
   const serialized = documents.map((doc) => ({
     id: doc.id,
     title: doc.title,
@@ -20,6 +21,7 @@ export default async function HomePage() {
     updatedBy: doc.updatedBy,
   }));
 
+  // Считаем метрики для карточек: динамику, клиентов и т.д.
   const now = Date.now();
   const MS_PER_DAY = 1000 * 60 * 60 * 24;
   const updatedLast7Days = serialized.filter(
@@ -81,15 +83,12 @@ export default async function HomePage() {
         label="Обзор"
         title="Коммерческие предложения"
         description="Управляйте документами и делитесь ссылками с клиентами."
-        actions={
-          <Button asChild size="sm">
-            <Link href="/editor">Новое предложение</Link>
-          </Button>
-        }
       />
       <main className="mx-auto flex w-full flex-1 flex-col gap-6 bg-white px-4 pb-10 pt-6 md:px-6">
+        {/* Карточки с основными показателями по документам. */}
         <SectionCards cards={statsCards} />
-        <ProposalsList initialDocuments={serialized} />
+        {/* Список предложений с поиском и кнопкой создания. */}
+        <ProposalsBoard initialDocuments={serialized} />
       </main>
     </div>
   );

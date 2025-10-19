@@ -2,6 +2,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Базовое текстовое поле с поддержкой состояний (focus, disabled, invalid).
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input

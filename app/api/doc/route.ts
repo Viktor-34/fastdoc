@@ -17,6 +17,7 @@ type DocBody = {
 };
 
 export async function POST(req: NextRequest) {
+  // Забираем тело запроса и нормализуем значения.
   const {
     id,
     title,
@@ -25,13 +26,16 @@ export async function POST(req: NextRequest) {
     workspaceId: workspaceOverride,
     userId = 'system',
   } = (await req.json()) as DocBody;
-  const workspaceId = getActiveWorkspaceId(workspaceOverride);
+  // Выбираем рабочую область: либо переданную явно, либо из заголовков/куки.
+  const workspaceId = await getActiveWorkspaceId(workspaceOverride);
   if (!json || !title) return new Response('Bad', { status: 400 });
 
+  // В любом случае пересобираем HTML на сервере, чтобы хранить актуальную версию.
   const html = generateHTML(json as JSONContent, createServerExtensions() as unknown as []);
 
   if (id) {
     try {
+      // Обновление существующего документа делаем транзакцией, чтобы версия и история были согласованы.
       const doc = await prisma.$transaction(async (tx) => {
         const existing = await tx.document.findFirst({ where: { id, workspaceId } });
         if (!existing) throw new Error('NOT_FOUND');
@@ -65,6 +69,7 @@ export async function POST(req: NextRequest) {
 
       return Response.json({ id: doc.id, version: doc.version });
     } catch (error) {
+      // Для отсутствующего документа возвращаем 404, остальные ошибки логируем.
       if (error instanceof Error && error.message === 'NOT_FOUND') {
         return new Response('Not found', { status: 404 });
       }
@@ -74,6 +79,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Создание нового документа: сразу фиксируем workspace и авторов.
     const doc = await prisma.document.create({
       data: {
         title,
@@ -99,6 +105,7 @@ export async function POST(req: NextRequest) {
 
     return Response.json({ id: doc.id, version: doc.version });
   } catch (error) {
+    // При неожиданных ошибках шлём 500 и логируем для отладки.
     console.error('Failed to create document', error);
     return new Response('Server error', { status: 500 });
   }

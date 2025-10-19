@@ -6,6 +6,7 @@ import { withWorkspaceHeader } from '@/lib/workspace-client';
 import { PriceTableNode } from './node';
 import type { PriceRow } from './node';
 
+// Товар каталога, который можно подставить в таблицу.
 type CatalogProduct = {
   id: string;
   name: string;
@@ -13,6 +14,7 @@ type CatalogProduct = {
   basePrice: number;
 };
 
+// Ответ API списка товаров.
 type CatalogResponse = {
   products?: Array<{
     id: string;
@@ -24,6 +26,7 @@ type CatalogResponse = {
 
 const defaultRow: PriceRow = { name: 'Позиция', qty: 1, price: 0, discount: 0 };
 
+// NodeView для редактируемой таблицы цен внутри редактора.
 export function PriceTableView({ node, updateAttributes, editor }: NodeViewProps) {
   const [rows, setRows] = useState<PriceRow[]>(node.attrs.rows || []);
   const [catalog, setCatalog] = useState<CatalogProduct[]>([]);
@@ -275,6 +278,7 @@ export function PriceTableView({ node, updateAttributes, editor }: NodeViewProps
   );
 }
 
+// Клиентская версия node: подключаем React node view.
 export const PriceTable = PriceTableNode.extend({
   addNodeView() { return ReactNodeViewRenderer(PriceTableView); },
 });

@@ -8,23 +8,30 @@ import {
   WORKSPACE_HEADER,
 } from "./workspace-constants";
 
+// Приводим строку к нормальному виду: обрезаем пробелы, фильтруем пустые значения.
 function normalizeWorkspaceId(value?: string | null) {
   const trimmed = value?.trim();
   return trimmed && trimmed.length > 0 ? trimmed : null;
 }
 
-export function getActiveWorkspaceId(explicit?: string | null) {
+// Определяем активную рабочую область: берём явное значение, заголовок или куку.
+export async function getActiveWorkspaceId(explicit?: string | null) {
+  const headersList = await headers();
+  const cookieStore = await cookies();
+  
   return (
     normalizeWorkspaceId(explicit) ??
-    normalizeWorkspaceId(headers().get(WORKSPACE_HEADER)) ??
-    normalizeWorkspaceId(cookies().get(WORKSPACE_COOKIE)?.value) ??
+    normalizeWorkspaceId(headersList.get(WORKSPACE_HEADER)) ??
+    normalizeWorkspaceId(cookieStore.get(WORKSPACE_COOKIE)?.value) ??
     DEFAULT_WORKSPACE_ID
   );
 }
 
-export function setActiveWorkspaceCookie(workspaceId: string) {
+// Сохраняем рабочую область в cookies, чтобы клиент и сервер были синхронизированы.
+export async function setActiveWorkspaceCookie(workspaceId: string) {
   const normalized = normalizeWorkspaceId(workspaceId) ?? DEFAULT_WORKSPACE_ID;
-  cookies().set({
+  const cookieStore = await cookies();
+  cookieStore.set({
     name: WORKSPACE_COOKIE,
     value: normalized,
     path: "/",
@@ -33,6 +40,8 @@ export function setActiveWorkspaceCookie(workspaceId: string) {
   return normalized;
 }
 
-export function clearWorkspaceCookie() {
-  cookies().delete(WORKSPACE_COOKIE);
+// Удаляем куку рабочей области (например, при выходе из аккаунта).
+export async function clearWorkspaceCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete(WORKSPACE_COOKIE);
 }

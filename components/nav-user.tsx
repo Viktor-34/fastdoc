@@ -29,6 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+// Навигационный блок с данными авторизованного пользователя.
 export function NavUser({
   user,
 }: {
@@ -38,8 +39,10 @@ export function NavUser({
     avatar: string
   }
 }) {
+  // Проверяем, мобильный ли режим, чтобы правильно позиционировать меню.
   const { isMobile } = useSidebar()
 
+  // Блок пользователя внизу сайдбара с аватаром и меню действий.
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -49,16 +52,20 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
+              {/* Аватар пользователя: показывает картинку или подставной текст. */}
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
+                {/* Fallback отображает заглушку, если нет изображения. */}
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
+              {/* Имя и почта располагаем в столбец, чтобы экономить место. */}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs text-neutral-500 dark:text-neutral-400">
                   {user.email}
                 </span>
               </div>
+              {/* Иконка меню показывает, что есть дополнительные действия. */}
               <MoreVerticalIcon className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -68,6 +75,7 @@ export function NavUser({
             align="end"
             sideOffset={4}
           >
+            {/* Повторяем краткую карточку пользователя внутри меню. */}
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
@@ -84,6 +92,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              {/* Основные пункты меню аккаунта. */}
               <DropdownMenuItem>
                 <UserCircleIcon />
                 Account
@@ -98,6 +107,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
+            {/* Завершающий пункт для выхода из системы. */}
             <DropdownMenuItem>
               <LogOutIcon />
               Log out
