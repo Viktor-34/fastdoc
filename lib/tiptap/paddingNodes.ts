@@ -5,6 +5,8 @@ import OrderedList from '@tiptap/extension-ordered-list';
 import CodeBlock from '@tiptap/extension-code-block';
 import type { Attributes } from '@tiptap/core';
 
+type HtmlAttributeMap = Record<string, unknown>;
+
 // Значения отступов по умолчанию, которые пробрасываем в узлы.
 type PaddingDefaults = { top: number; bottom: number };
 
@@ -42,12 +44,12 @@ function buildStyle(styleValue: unknown, top: number, bottom: number) {
 }
 
 // Удаляем paddingTop/paddingBottom из атрибутов и переносим в style.
-function stripPaddingAttributes<T extends Record<string, any>>(HTMLAttributes: T, defaults: PaddingDefaults) {
+function stripPaddingAttributes(HTMLAttributes: HtmlAttributeMap, defaults: PaddingDefaults) {
   const { paddingTop, paddingBottom, style, ...rest } = HTMLAttributes;
   const topValue = coercePadding(paddingTop, defaults.top);
   const bottomValue = coercePadding(paddingBottom, defaults.bottom);
   const mergedStyle = buildStyle(style, topValue, bottomValue);
-  return { attrs: rest, style: mergedStyle };
+  return { attrs: rest as HtmlAttributeMap, style: mergedStyle };
 }
 
 // Конфиг атрибутов для Tiptap node (умеет парсить из HTML).
@@ -98,8 +100,9 @@ export const HeadingWithPadding = Heading.extend({
     const hasLevel = this.options.levels.includes(node.attrs.level);
     const tag = hasLevel ? `h${node.attrs.level}` : this.options.levels[0];
     const { attrs, style } = stripPaddingAttributes(HTMLAttributes, DEFAULT_TEXT_PADDING);
-    const { level, ...rest } = attrs as Record<string, any>;
-    return [tag, { ...rest, style }, 0];
+    const headingAttrs: Record<string, unknown> = { ...attrs };
+    delete headingAttrs.level;
+    return [tag, { ...headingAttrs, style }, 0];
   },
 });
 
@@ -141,16 +144,21 @@ export const CodeBlockWithPadding = CodeBlock.extend({
   },
   renderHTML({ HTMLAttributes }) {
     const { attrs, style } = stripPaddingAttributes(HTMLAttributes, DEFAULT_TEXT_PADDING);
-    const { language, class: className, ...rest } = attrs as Record<string, any>;
-    const preAttrs: Record<string, any> = { ...rest, style };
-    if (className) preAttrs.class = className;
-    if (language) preAttrs['data-language'] = language;
-    const codeAttrs = language ? { class: `language-${language}` } : {};
+    const { language, class: className, ...rest } = attrs;
+    const preAttrs: Record<string, unknown> = { ...(rest as HtmlAttributeMap), style };
+    if (typeof className === 'string' && className.trim()) {
+      preAttrs.class = className;
+    }
+    if (typeof language === 'string' && language.trim()) {
+      preAttrs['data-language'] = language;
+    }
+    const codeAttrs: Record<string, string> =
+      typeof language === 'string' && language.trim() ? { class: `language-${language}` } : {};
     return ['pre', preAttrs, ['code', codeAttrs, 0]];
   },
 });
 
-export function applyPaddingToNodeHTMLAttributes(HTMLAttributes: Record<string, any>, defaults: PaddingDefaults) {
+export function applyPaddingToNodeHTMLAttributes(HTMLAttributes: HtmlAttributeMap, defaults: PaddingDefaults) {
   const { attrs, style } = stripPaddingAttributes(HTMLAttributes, defaults);
   return { attrs, style };
 }

@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
 import { generateHTML } from '@tiptap/html';
+import { prisma } from '@/lib/db/prisma';
 import { createServerExtensions } from '@/lib/tiptap/extensions';
+import { getServerAuthSession } from '@/lib/auth';
 import { getActiveWorkspaceId } from '@/lib/workspace';
 import type { JSONContent } from '@tiptap/core';
 
@@ -13,10 +14,14 @@ type DocBody = {
   json: unknown;
   publish?: boolean;
   workspaceId?: string;
-  userId?: string;
 };
 
 export async function POST(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+  const actorId = session.user.id;
   // Забираем тело запроса и нормализуем значения.
   const {
     id,
@@ -24,10 +29,9 @@ export async function POST(req: NextRequest) {
     json,
     publish = false,
     workspaceId: workspaceOverride,
-    userId = 'system',
   } = (await req.json()) as DocBody;
   // Выбираем рабочую область: либо переданную явно, либо из заголовков/куки.
-  const workspaceId = await getActiveWorkspaceId(workspaceOverride);
+  const workspaceId = await getActiveWorkspaceId(workspaceOverride ?? session.user.workspaceId);
   if (!json || !title) return new Response('Bad', { status: 400 });
 
   // В любом случае пересобираем HTML на сервере, чтобы хранить актуальную версию.
@@ -44,7 +48,7 @@ export async function POST(req: NextRequest) {
           title,
           json,
           html,
-          updatedBy: userId,
+          updatedBy: actorId,
         } as const;
 
         if (!publish) {
@@ -86,8 +90,8 @@ export async function POST(req: NextRequest) {
         json,
         html,
         workspaceId,
-        createdBy: userId,
-        updatedBy: userId,
+        createdBy: actorId,
+        updatedBy: actorId,
         version: publish ? 1 : 0,
       },
     });

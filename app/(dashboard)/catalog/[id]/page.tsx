@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 
 import { ProductForm } from "@/components/product-form";
 import { prisma } from "@/lib/db/prisma";
-import { getActiveWorkspaceId } from "@/lib/workspace";
+import { getServerAuthSession } from "@/lib/auth";
+import { DEFAULT_WORKSPACE_ID } from "@/lib/workspace-constants";
 
 /* Пропсы страницы редактирования: динамический параметр id приходит через params. */
 type CatalogEditPageProps = {
@@ -13,7 +14,8 @@ type CatalogEditPageProps = {
 export default async function CatalogEditPage({ params }: CatalogEditPageProps) {
   const { id } = await params;
   // Определяем рабочую область, чтобы не дать отредактировать чужие товары.
-  const workspaceId = await getActiveWorkspaceId();
+  const session = await getServerAuthSession();
+  const workspaceId = session?.user.workspaceId ?? DEFAULT_WORKSPACE_ID;
 
   // Загружаем товар и его строки расшифровки.
   const product = await prisma.product.findFirst({

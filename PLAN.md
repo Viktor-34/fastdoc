@@ -20,7 +20,7 @@
     
 - Аутентификация: **Auth.js (NextAuth)** с JWT + RBAC ролями (owner/admin/editor/viewer).
     
-- PDF: **Playwright** (или `puppeteer-core + @sparticuz/chromium` для серверлесс).
+- PDF: **puppeteer-core + @sparticuz/chromium** (serverless-friendly).
     
 - Аналитика: собственный `/api/track` + опционально **Umami/Plausible** в публичной странице.
     
@@ -38,12 +38,29 @@ npm i -D prisma
 # editor
 npm i @tiptap/react @tiptap/core @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-link @tiptap/extension-text-align @tiptap/html
 # pdf
-npm i -D playwright
+npm i puppeteer-core @sparticuz/chromium
 # загрузка в s3 (пример)
 npm i @aws-sdk/client-s3
 # real-time (опция)
 npm i yjs @hocuspocus/provider
 ```
+
+---
+
+# 2.1) Auth.js (NextAuth) настройка
+
+- Переменные окружения (обязательные для production):  
+  `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `EMAIL_FROM`, `EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`.  
+  В локальной среде при отсутствии SMTP используется потоковый транспорт — письма логируются в терминал.
+- Дополнительные провайдеры OAuth включаются при наличии пар:  
+  `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`, `YANDEX_CLIENT_ID` + `YANDEX_CLIENT_SECRET`, `VK_CLIENT_ID` + `VK_CLIENT_SECRET`.
+- При первом входе пользователя создаётся личная рабочая область, пользователь получает роль `OWNER`; последующие запросы используют workspaceId из сессии/куки.
+- Страницы входа: `/auth/signin` (magic-link + OAuth), `/auth/verify-request` (инструкция после отправки письма) и `/auth/error` (обработка ошибок авторизации).
+- Подробная инструкция по настройке: `docs/auth-setup.md` (миграции, SMTP, OAuth).
+- Настройки пользователя: `/settings/profile` — изменение имени и, для владельцев/админов, названия рабочей области.
+- После изменения `prisma/schema.prisma` выполняем `npx prisma generate`.  
+  Для синхронизации с Postgres запустить `npx prisma migrate dev --name add-auth`.
+- Схема Prisma расширена полями `image`, `emailVerified`, связями `accounts`/`sessions` в `User` и стандартными моделями `Account`, `Session`, `VerificationToken` (см. актуальный `schema.prisma`).
 
 ---
 
@@ -54,6 +71,7 @@ app/
   editor/page.tsx                // редактор + палитра + предпросмотр
   p/[token]/page.tsx             // публичный просмотр HTML
   p/[token]/pdf/route.ts         // PDF по прямой ссылке
+  (dashboard)/settings/profile/  // настройки профиля и рабочей области
   api/
     doc/route.ts                 // create/update документа
     pdf/route.ts                 // HTML -> PDF
@@ -354,8 +372,8 @@ export async function POST(req: NextRequest) {
   const { html } = await req.json();
   if (!html) return new Response('No HTML', { status: 400 });
 
-  const { chromium } = await import('playwright'); // dev/Node
-  const browser = await chromium.launch();
+  const { launchPdfBrowser } = await import('@/lib/pdf/launchBrowser');
+  const browser = await launchPdfBrowser();
   const page = await browser.newPage();
   await page.setContent(htmlShell(html), { waitUntil: 'networkidle' });
 
@@ -372,7 +390,7 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-> Серверлесс: замените на `puppeteer-core + @sparticuz/chromium` и используйте Edge-совместимый бандл.
+> Локально нужен установленный Chrome/Chromium (можно задать путь через `CHROME_EXECUTABLE_PATH`). В serverless-средах автоматически используется `@sparticuz/chromium`.
 
 ---
 
@@ -518,7 +536,7 @@ model Events {
 
 - **Unit:** рендереры JSON→HTML для каждого блока (включая PriceTable).
     
-- **E2E (Playwright):**
+- **E2E (Puppeteer):**
     
     - создаёт документ → предпросмотр совпадает с PDF (скриншот-дифф).
         
@@ -550,7 +568,7 @@ model Events {
 
 - Редактор (Tiptap) с блоками: Заголовок, Текст, Изображение, Отступ, Таблица цен (минимум).
     
-- Предпросмотр (iframe) + экспорт PDF (Playwright).
+- Предпросмотр (iframe) + экспорт PDF (puppeteer-core + @sparticuz/chromium).
     
 - Публичные ссылки (/p/:token) + базовая аналитика (`opened`, `time`, `download`).
     

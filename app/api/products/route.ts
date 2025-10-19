@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import { getServerAuthSession } from '@/lib/auth';
 import { getActiveWorkspaceId } from '@/lib/workspace';
 import type { Prisma } from '@prisma/client';
 
@@ -19,8 +20,14 @@ function serializeProduct(product: Prisma.ProductGetPayload<{ include: { priceIt
 }
 
 export async function GET(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   // Подмешиваем активную рабочую область (из запроса или куки).
-  const workspaceId = await getActiveWorkspaceId(req.nextUrl.searchParams.get('workspaceId'));
+  const workspaceId = await getActiveWorkspaceId(
+    req.nextUrl.searchParams.get('workspaceId') ?? session.user.workspaceId,
+  );
   const products = await prisma.product.findMany({
     where: { workspaceId },
     include: { priceItems: true },
@@ -45,8 +52,12 @@ type ProductCreateBody = {
 };
 
 export async function POST(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   const body = (await req.json()) as ProductCreateBody;
-  const workspaceId = await getActiveWorkspaceId(body.workspaceId);
+  const workspaceId = await getActiveWorkspaceId(body.workspaceId ?? session.user.workspaceId);
   if (!body?.name || typeof body.basePrice !== 'number') {
     return new Response('name and basePrice required', { status: 400 });
   }
@@ -94,12 +105,16 @@ type ProductUpdateBody = {
 };
 
 export async function PUT(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   const { id, priceItems, workspaceId: workspaceOverride, ...rest } =
     (await req.json()) as ProductUpdateBody;
   if (!id) return new Response('id required', { status: 400 });
 
   // Убеждаемся, что пользователь работает в рамках своей рабочей области.
-  const workspaceId = await getActiveWorkspaceId(workspaceOverride);
+  const workspaceId = await getActiveWorkspaceId(workspaceOverride ?? session.user.workspaceId);
 
   const existingProduct = await prisma.product.findUnique({ where: { id } });
   if (!existingProduct || existingProduct.workspaceId !== workspaceId) {
@@ -162,11 +177,15 @@ export async function PUT(req: NextRequest) {
 type ProductDeleteBody = { id?: string };
 
 export async function DELETE(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   const { id } = (await req.json()) as ProductDeleteBody;
   if (!id) return new Response('id required', { status: 400 });
 
   // Проверяем принадлежность записи текущему workspace перед удалением.
-  const workspaceId = await getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId(session.user.workspaceId);
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing || existing.workspaceId !== workspaceId) {
     return new Response('not found', { status: 404 });

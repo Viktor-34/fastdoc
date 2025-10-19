@@ -42,7 +42,8 @@ export function useEditorCommands(editor: Editor | null) {
       }),
     );
     if (!res.ok) {
-      console.error('Failed to export PDF');
+      const message = await res.text().catch(() => 'Unknown error');
+      console.error('Failed to export PDF', res.status, message);
       return;
     }
     const blob = await res.blob();

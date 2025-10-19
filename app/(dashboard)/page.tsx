@@ -4,11 +4,16 @@ import { ProposalsBoard } from "@/components/proposals-board";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { prisma } from "@/lib/db/prisma";
+import { getServerAuthSession } from "@/lib/auth";
+import { DEFAULT_WORKSPACE_ID } from "@/lib/workspace-constants";
 
 // Главная страница: обзор документов и сводная статистика.
 export default async function HomePage() {
+  const session = await getServerAuthSession();
+  const workspaceId = session?.user.workspaceId ?? DEFAULT_WORKSPACE_ID;
   // Получаем документы из базы, сортируя по дате обновления.
   const documents = await prisma.document.findMany({
+    where: { workspaceId },
     orderBy: { updatedAt: "desc" },
   });
 

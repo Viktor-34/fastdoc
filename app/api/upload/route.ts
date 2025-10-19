@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
 
+import { getServerAuthSession } from '@/lib/auth';
 import { getActiveWorkspaceId } from '@/lib/workspace';
 
 export const runtime = 'nodejs';
@@ -15,8 +16,12 @@ function sanitizeSegment(value: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   // Каждая рабочая область получает свою подпапку.
-  const workspaceId = await getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId(session.user.workspaceId);
   const workspaceSegment = sanitizeSegment(workspaceId);
   const workspaceDir = path.join(UPLOAD_DIR, workspaceSegment);
 

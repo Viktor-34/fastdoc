@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { prisma } from '@/lib/db/prisma';
+import { getServerAuthSession } from '@/lib/auth';
+import { DEFAULT_WORKSPACE_ID } from '@/lib/workspace-constants';
 
 export const runtime = 'nodejs';
 
@@ -10,13 +12,28 @@ function generateToken() {
   return randomBytes(TOKEN_BYTES).toString('hex');
 }
 
-export async function POST(_req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function POST(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   if (!id) {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
 
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const workspaceId = session.user.workspaceId ?? DEFAULT_WORKSPACE_ID;
+
   try {
+    const document = await prisma.document.findFirst({
+      where: { id, workspaceId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
     let share = await prisma.shareLink.findFirst({
       where: { documentId: id },
       orderBy: { createdAt: 'desc' },

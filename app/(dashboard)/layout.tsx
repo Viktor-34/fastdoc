@@ -1,7 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { redirect } from 'next/navigation';
 import { AppSidebar } from '@/components/app-sidebar';
 import { WorkspaceInitializer } from '@/components/workspace-initializer';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { getServerAuthSession } from '@/lib/auth';
 import { getActiveWorkspaceId } from '@/lib/workspace';
 
 // Базовый layout для внутренних страниц приложения.
@@ -10,8 +12,12 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    redirect('/auth/signin');
+  }
   // Узнаём активную рабочую область, чтобы подставить её в контекст.
-  const activeWorkspaceId = await getActiveWorkspaceId();
+  const activeWorkspaceId = await getActiveWorkspaceId(session.user.workspaceId);
   // Задаём ширину боковой панели через CSS-переменную.
   const sidebarStyles = {
     '--sidebar-width': '20rem',

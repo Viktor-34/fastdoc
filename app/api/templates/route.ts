@@ -1,18 +1,23 @@
 import { NextRequest } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
 import { generateHTML } from '@tiptap/html';
+import { prisma } from '@/lib/db/prisma';
 import { createServerExtensions } from '@/lib/tiptap/extensions';
+import { getServerAuthSession } from '@/lib/auth';
 import { getActiveWorkspaceId } from '@/lib/workspace';
 import type { Prisma } from '@prisma/client';
 import type { JSONContent } from '@tiptap/core';
 
 export const runtime = 'nodejs';
 
-const DEFAULT_USER = 'system';
-
 export async function GET(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   // Шаблоны всегда привязаны к рабочей области.
-  const workspaceId = await getActiveWorkspaceId(req.nextUrl.searchParams.get('workspaceId'));
+  const workspaceId = await getActiveWorkspaceId(
+    req.nextUrl.searchParams.get('workspaceId') ?? session.user.workspaceId,
+  );
   const templates = await prisma.template.findMany({
     where: { workspaceId },
     orderBy: { createdAt: 'desc' },
@@ -28,14 +33,17 @@ type TemplateCreateBody = {
   json?: Prisma.JsonValue;
   workspaceId?: string;
   title?: string;
-  userId?: string;
 };
 
 export async function POST(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+  const actorId = session.user.id;
   const body = (await req.json()) as TemplateCreateBody;
   const action = body.action ?? (body.templateId ? 'apply' : 'create');
-  const workspaceId = await getActiveWorkspaceId(body.workspaceId);
-  const userId = body.userId ?? DEFAULT_USER;
+  const workspaceId = await getActiveWorkspaceId(body.workspaceId ?? session.user.workspaceId);
 
   if (action === 'apply') {
     if (!body.templateId) return new Response('templateId required', { status: 400 });
@@ -52,8 +60,8 @@ export async function POST(req: NextRequest) {
         json: template.json,
         html: template.html,
         workspaceId: targetWorkspaceId,
-        createdBy: userId,
-        updatedBy: userId,
+        createdBy: actorId,
+        updatedBy: actorId,
         version: 0,
       },
     });
@@ -99,10 +107,14 @@ type TemplateUpdateBody = {
 };
 
 export async function PUT(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   const { id, name, json } = (await req.json()) as TemplateUpdateBody;
   if (!id) return new Response('id required', { status: 400 });
 
-  const workspaceId = await getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId(session.user.workspaceId);
   // Не даём вмешиваться в чужие шаблоны.
   const existing = await prisma.template.findFirst({ where: { id, workspaceId } });
   if (!existing) return new Response('Template not found', { status: 404 });
@@ -127,9 +139,13 @@ type TemplateDeleteBody = {
 };
 
 export async function DELETE(req: NextRequest) {
+  const session = await getServerAuthSession();
+  if (!session?.user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   const { id } = (await req.json()) as TemplateDeleteBody;
   if (!id) return new Response('id required', { status: 400 });
-  const workspaceId = await getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId(session.user.workspaceId);
   // Удалять можно только внутри своей рабочей области.
   const existing = await prisma.template.findFirst({ where: { id, workspaceId } });
   if (!existing) return new Response('Template not found', { status: 404 });

@@ -1,4 +1,4 @@
-продолжай сам"use client";
+"use client";
 
 import {
   DEFAULT_WORKSPACE_ID,
@@ -45,8 +45,7 @@ export function setClientWorkspaceId(workspaceId: string, options?: { maxAgeSeco
 
 // Добавляем заголовок workspaceId ко всем fetch-запросам с клиента.
 export function withWorkspaceHeader(init?: RequestInit) {
-  const workspaceId = getClientWorkspaceId();
-  if (!workspaceId) return init ?? {};
+  const workspaceId = getClientWorkspaceId() ?? DEFAULT_WORKSPACE_ID;
   const headers = new Headers(init?.headers ?? {});
   headers.set(WORKSPACE_HEADER, workspaceId);
   return { ...(init ?? {}), headers } as RequestInit;

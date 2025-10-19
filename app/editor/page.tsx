@@ -1,8 +1,9 @@
 'use client';
 import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, DragEvent, MouseEvent } from 'react';
-import type { JSONContent } from '@tiptap/core';
+import type { Editor as TiptapEditor, JSONContent } from '@tiptap/core';
 import { useEditor, EditorContent } from '@tiptap/react';
+import type { Node as ProseMirrorNode, Mark as ProseMirrorMark } from '@tiptap/pm/model';
 import { createClientExtensions } from '@/lib/tiptap/extensions';
 import { useEditorCommands } from '@/app/editor/hooks/useEditorCommands';
 import { useImageUpload } from '@/app/editor/hooks/useImageUpload';
@@ -157,26 +158,6 @@ export default function EditorPage() {
   // Доступные размеры шрифта для выпадающего списка.
   const fontSizeOptions = ['14px', '16px', '18px', '20px', '24px'];
 
-  // Применяем выбранный цвет, либо сбрасываем, если value пустое.
-  const applyColor = (value: string | null) => {
-    if (!editor) return;
-    if (!value) {
-      editor.chain().focus().unsetColor().run();
-    } else {
-      editor.chain().focus().setColor(value).run();
-    }
-  };
-
-  // Аналогично меняем размер шрифта выбранного текста.
-  const applyFontSize = (value: string) => {
-    if (!editor) return;
-    if (!value) {
-      editor.chain().focus().unsetFontSize().run();
-    } else {
-      editor.chain().focus().setFontSize(value).run();
-    }
-  };
-
   // Универсально обновляем атрибуты текущего блока.
   const updateBlockAttributes = useCallback((attrs: Record<string, unknown>) => {
     if (!editor || !selectedBlock) return;
@@ -210,7 +191,9 @@ export default function EditorPage() {
     [editor, selectedBlock],
   );
 
-  const runOnSelectedBlock = useCallback((operation: (chain: any) => any) => {
+  type ChainCallback = (chain: ReturnType<TiptapEditor['chain']>) => ReturnType<TiptapEditor['chain']>;
+
+  const runOnSelectedBlock = useCallback((operation: ChainCallback) => {
     if (!editor || !selectedBlock) return;
     const docSize = editor.state.doc.content.size;
     const start = Math.min(selectedBlock.from + 1, docSize);
@@ -219,18 +202,21 @@ export default function EditorPage() {
     chain = chain.setTextSelection({ from: start, to: end });
     operation(chain).run();
     setSelectedBlock((prev) => (prev ? { ...prev } : prev));
-  }, [editor, selectedBlock, setSelectedBlock]);
+  }, [editor, selectedBlock]);
 
   const findFirstMarkAttribute = useCallback((markName: string, attribute: string): string | null => {
     if (!editor || !selectedBlock) return null;
     const node = editor.state.doc.nodeAt(selectedBlock.from);
     if (!node) return null;
     let value: string | null = null;
-    node.descendants((child: any) => {
+    node.descendants((child: ProseMirrorNode) => {
       if (!child.marks) return true;
-      for (const mark of child.marks) {
-        if (mark.type.name === markName && mark.attrs && mark.attrs[attribute]) {
-          value = mark.attrs[attribute];
+      const marks = child.marks as ProseMirrorMark[];
+      for (const mark of marks) {
+        if (mark.type.name !== markName) continue;
+        const attrValue = mark.attrs?.[attribute];
+        if (attrValue != null) {
+          value = String(attrValue);
           return false;
         }
       }
@@ -593,9 +579,10 @@ export default function EditorPage() {
     if (!selectedNode) return 'left';
     if (selectedNode.attrs?.textAlign) return selectedNode.attrs.textAlign as string;
     let align = 'left';
-    selectedNode.descendants((child: any) => {
-      if (child.attrs?.textAlign) {
-        align = child.attrs.textAlign;
+    selectedNode.descendants((child: ProseMirrorNode) => {
+      const alignAttr = child.attrs?.textAlign;
+      if (typeof alignAttr === 'string') {
+        align = alignAttr;
         return false;
       }
       return true;
