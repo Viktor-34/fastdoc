@@ -47,7 +47,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
             </p>
             <h1 className="text-2xl font-semibold text-neutral-900">Вход в аккаунт</h1>
             <p className="text-sm text-neutral-500">
-              Используйте одноразовую ссылку на email или подключите OAuth-провайдер.
+              Используйте одноразовую ссылку, которую мы отправим на ваш email.
             </p>
           </div>
 

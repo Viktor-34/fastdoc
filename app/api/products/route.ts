@@ -3,15 +3,16 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerAuthSession } from '@/lib/auth';
 import { getActiveWorkspaceId } from '@/lib/workspace';
 import type { Prisma } from '@prisma/client';
+import { apiError, apiSuccess } from '@/lib/api/response';
 
 export const runtime = 'nodejs';
 
 // Приводим числовые поля Prisma к обычным number и сериализуем позиции.
-function serializeProduct(product: Prisma.ProductGetPayload<{ include: { priceItems: true } }>) {
+function serializeProduct(product: Prisma.ProductGetPayload<{ include: { PriceItem: true } }>) {
   return {
     ...product,
     basePrice: Number(product.basePrice),
-    priceItems: product.priceItems.map((item) => ({
+    priceItems: product.PriceItem.map((item) => ({
       ...item,
       unitPrice: Number(item.unitPrice),
       discount: item.discount != null ? Number(item.discount) : null,
@@ -22,7 +23,7 @@ function serializeProduct(product: Prisma.ProductGetPayload<{ include: { priceIt
 export async function GET(req: NextRequest) {
   const session = await getServerAuthSession();
   if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
+    return apiError('Unauthorized', 401);
   }
   // Подмешиваем активную рабочую область (из запроса или куки).
   const workspaceId = await getActiveWorkspaceId(
@@ -30,10 +31,10 @@ export async function GET(req: NextRequest) {
   );
   const products = await prisma.product.findMany({
     where: { workspaceId },
-    include: { priceItems: true },
+    include: { PriceItem: true },
     orderBy: { name: 'asc' },
   });
-  return Response.json({ products: products.map(serializeProduct) });
+  return apiSuccess({ products: products.map(serializeProduct) });
 }
 
 type ProductCreateBody = {
@@ -54,37 +55,45 @@ type ProductCreateBody = {
 export async function POST(req: NextRequest) {
   const session = await getServerAuthSession();
   if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
+    return apiError('Unauthorized', 401);
   }
   const body = (await req.json()) as ProductCreateBody;
   const workspaceId = await getActiveWorkspaceId(body.workspaceId ?? session.user.workspaceId);
   if (!body?.name || typeof body.basePrice !== 'number') {
-    return new Response('name and basePrice required', { status: 400 });
+    return apiError('name and basePrice required', 400);
   }
 
-  const product = await prisma.product.create({
-    data: {
-      name: body.name,
-      sku: body.sku ?? null,
-      description: body.description ?? null,
-      currency: body.currency ?? 'RUB',
-      basePrice: body.basePrice,
-      workspaceId,
-      priceItems: body.priceItems?.length
-        ? {
-            create: body.priceItems.map((item) => ({
-              label: item.label,
-              qty: item.qty ?? 1,
-              unitPrice: item.unitPrice,
-              discount: item.discount ?? undefined,
-            })),
-          }
-        : undefined,
-    },
-    include: { priceItems: true },
-  });
+  try {
+    const product = await prisma.product.create({
+      data: {
+        name: body.name,
+        sku: body.sku ?? null,
+        description: body.description ?? null,
+        currency: body.currency ?? 'RUB',
+        basePrice: body.basePrice,
+        workspaceId,
+        PriceItem: body.priceItems?.length
+          ? {
+              create: body.priceItems.map((item) => ({
+                label: item.label,
+                qty: item.qty ?? 1,
+                unitPrice: item.unitPrice,
+                discount: item.discount ?? undefined,
+              })),
+            }
+          : undefined,
+      },
+      include: { PriceItem: true },
+    });
 
-  return Response.json({ product: serializeProduct(product) });
+    return apiSuccess({ product: serializeProduct(product) });
+  } catch (error) {
+    console.error('Failed to create product:', error);
+    return apiError(
+      error instanceof Error ? error.message : 'Failed to create product',
+      500,
+    );
+  }
 }
 
 type ProductUpdateBody = {
@@ -107,18 +116,18 @@ type ProductUpdateBody = {
 export async function PUT(req: NextRequest) {
   const session = await getServerAuthSession();
   if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
+    return apiError('Unauthorized', 401);
   }
   const { id, priceItems, workspaceId: workspaceOverride, ...rest } =
     (await req.json()) as ProductUpdateBody;
-  if (!id) return new Response('id required', { status: 400 });
+  if (!id) return apiError('id required', 400);
 
   // Убеждаемся, что пользователь работает в рамках своей рабочей области.
   const workspaceId = await getActiveWorkspaceId(workspaceOverride ?? session.user.workspaceId);
 
   const existingProduct = await prisma.product.findUnique({ where: { id } });
   if (!existingProduct || existingProduct.workspaceId !== workspaceId) {
-    return new Response('not found', { status: 404 });
+    return apiError('not found', 404);
   }
 
   const data: Prisma.ProductUpdateInput = {};
@@ -167,11 +176,11 @@ export async function PUT(req: NextRequest) {
     return tx.product.update({
       where: { id },
       data,
-      include: { priceItems: true },
+      include: { PriceItem: true },
     });
   });
 
-  return Response.json({ product: serializeProduct(txResult) });
+  return apiSuccess({ product: serializeProduct(txResult) });
 }
 
 type ProductDeleteBody = { id?: string };
@@ -179,18 +188,18 @@ type ProductDeleteBody = { id?: string };
 export async function DELETE(req: NextRequest) {
   const session = await getServerAuthSession();
   if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
+    return apiError('Unauthorized', 401);
   }
   const { id } = (await req.json()) as ProductDeleteBody;
-  if (!id) return new Response('id required', { status: 400 });
+  if (!id) return apiError('id required', 400);
 
   // Проверяем принадлежность записи текущему workspace перед удалением.
   const workspaceId = await getActiveWorkspaceId(session.user.workspaceId);
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing || existing.workspaceId !== workspaceId) {
-    return new Response('not found', { status: 404 });
+    return apiError('not found', 404);
   }
 
   await prisma.product.delete({ where: { id } });
-  return new Response('ok');
+  return apiSuccess({ ok: true });
 }

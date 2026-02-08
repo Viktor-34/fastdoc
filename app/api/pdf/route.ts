@@ -6,7 +6,18 @@ import { getServerAuthSession } from '@/lib/auth';
 import { getActiveWorkspaceId } from '@/lib/workspace';
 import { WORKSPACE_COOKIE, WORKSPACE_HEADER } from '@/lib/workspace-constants';
 import { prisma } from '@/lib/db/prisma';
-import type { AdvantageItem, ProductVariant, Proposal, ProposalItem } from '@/lib/types/proposal';
+import {
+  parseAdvantages,
+  parseAdvantagesColumns,
+  parseOptionalStringArray,
+  parseProductsView,
+  parseProductVariants,
+  parseProposalItems,
+  pricingModeSchema,
+  safeParseStringArray,
+} from '@/lib/types/proposal-schema';
+import type { Proposal } from '@/lib/types/proposal';
+import { apiError } from '@/lib/api/response';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -14,20 +25,20 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   const session = await getServerAuthSession();
   if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
+    return apiError('Unauthorized', 401);
   }
 
   const rawContentLength = req.headers.get('content-length');
   if (rawContentLength) {
     const contentLength = Number(rawContentLength);
     if (Number.isFinite(contentLength) && contentLength > 100 * 1024) {
-      return new Response('Payload too large', { status: 413 });
+      return apiError('Payload too large', 413);
     }
   }
 
   // Принимаем proposalId
   const { filename, proposalId } = await req.json();
-  if (!proposalId) return new Response('proposalId required', { status: 400 });
+  if (!proposalId) return apiError('proposalId required', 400);
 
   const headerWorkspace = req.headers.get(WORKSPACE_HEADER)?.trim();
   const cookieWorkspace = req.cookies.get(WORKSPACE_COOKIE)?.value?.trim();
@@ -41,7 +52,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!proposal) {
-      return new Response('Proposal not found', { status: 404 });
+      return apiError('Proposal not found', 404);
     }
 
     const pdfFilename = filename || `${proposal.title || 'proposal'}.pdf`;
@@ -75,24 +86,16 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const items = Array.isArray(proposal.items)
-      ? (proposal.items as unknown as ProposalItem[])
-      : [];
-    const galleryImages = Array.isArray(proposal.galleryImages)
-      ? (proposal.galleryImages as unknown as string[])
-      : [];
-    const advantages = Array.isArray(proposal.advantages)
-      ? (proposal.advantages as unknown as AdvantageItem[])
-      : [];
-    const productVariants = Array.isArray(proposal.productVariants)
-      ? (proposal.productVariants as unknown as ProductVariant[])
-      : [];
-    const normalizedPricingMode: Proposal['pricingMode'] =
-      proposal.pricingMode === 'variants' ? 'variants' : 'single';
-    const advantagesColumns =
-      typeof proposal.advantagesColumns === 'number'
-        ? Math.min(3, Math.max(1, proposal.advantagesColumns))
-        : 3;
+    const items = parseProposalItems(proposal.items);
+    const galleryImages = safeParseStringArray(proposal.galleryImages);
+    const advantages = parseAdvantages(proposal.advantages);
+    const productVariants = parseProductVariants(proposal.productVariants);
+    const visibleSections = parseOptionalStringArray(proposal.visibleSections);
+    const parsedPricingMode = pricingModeSchema.safeParse(proposal.pricingMode);
+    const normalizedPricingMode: Proposal['pricingMode'] = parsedPricingMode.success
+      ? parsedPricingMode.data
+      : 'single';
+    const advantagesColumns = parseAdvantagesColumns(proposal.advantagesColumns);
 
     const normalizedStatus: NonNullable<Proposal['status']> =
       proposal.status === 'draft' ||
@@ -109,10 +112,7 @@ export async function POST(req: NextRequest) {
       pricingMode: normalizedPricingMode,
       productVariants,
       activeVariantId: proposal.activeVariantId ?? undefined,
-      productsView:
-        proposal.productsView && typeof proposal.productsView === 'object'
-          ? (proposal.productsView as Proposal['productsView'])
-          : undefined,
+      productsView: parseProductsView(proposal.productsView),
       advantages,
       advantagesColumns: advantagesColumns as 1 | 2 | 3,
       status: normalizedStatus,
@@ -125,9 +125,7 @@ export async function POST(req: NextRequest) {
       paymentTerms: proposal.paymentTerms ?? undefined,
       paymentCustom: proposal.paymentCustom ?? undefined,
       validUntil: proposal.validUntil ?? undefined,
-      visibleSections: Array.isArray(proposal.visibleSections)
-        ? (proposal.visibleSections as unknown as string[])
-        : undefined,
+      visibleSections,
       ctaText: proposal.ctaText ?? undefined,
       ctaPhone: proposal.ctaPhone ?? undefined,
       ctaEmail: proposal.ctaEmail ?? undefined,
@@ -193,6 +191,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('PDF generation failed', error);
-    return new Response('Failed to generate PDF', { status: 500 });
+    return apiError('Failed to generate PDF', 500);
   }
 }

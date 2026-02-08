@@ -5,6 +5,7 @@ import path from 'path';
 
 import { getServerAuthSession } from '@/lib/auth';
 import { getActiveWorkspaceId } from '@/lib/workspace';
+import { apiError, apiSuccess } from '@/lib/api/response';
 
 export const runtime = 'nodejs';
 
@@ -18,7 +19,7 @@ function sanitizeSegment(value: string) {
 export async function POST(request: NextRequest) {
   const session = await getServerAuthSession();
   if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
+    return apiError('Unauthorized', 401);
   }
   // Каждая рабочая область получает свою подпапку.
   const workspaceId = await getActiveWorkspaceId(session.user.workspaceId);
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const file = formData.get('file');
   if (!(file instanceof File)) {
-    return new Response('No file provided', { status: 400 });
+    return apiError('No file provided', 400);
   }
 
   const arrayBuffer = await file.arrayBuffer();
@@ -43,5 +44,5 @@ export async function POST(request: NextRequest) {
   await writeFile(filePath, buffer);
 
   const url = `/uploads/${workspaceSegment}/${fileName}`;
-  return Response.json({ url, workspaceId });
+  return apiSuccess({ url, workspaceId });
 }

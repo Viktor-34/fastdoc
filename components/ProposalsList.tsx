@@ -1,12 +1,48 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Link2, Loader2, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, Link2, Loader2, Trash2 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+
+// Статусы КП
+export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected';
+
+const STATUS_CHIP_STYLES: Record<
+  ProposalStatus,
+  { label: string; backgroundColor: string; color: string; borderColor: string }
+> = {
+  draft: {
+    label: "Черновик",
+    backgroundColor: "#F3F2F0",
+    color: "#73726c",
+    borderColor: "hsl(30deg 3.3% 11.8% / 15%)",
+  },
+  sent: {
+    label: "Отправлено",
+    backgroundColor: "#FAEFEB",
+    color: "#A04F33",
+    borderColor: "#E4B5A6",
+  },
+  accepted: {
+    label: "Принято",
+    backgroundColor: "#EAF6EE",
+    color: "#2F6B45",
+    borderColor: "#B9DEC8",
+  },
+  rejected: {
+    label: "Отклонено",
+    backgroundColor: "#FDEDED",
+    color: "#A53A3A",
+    borderColor: "#E9B8B8",
+  },
+};
+const TABLE_BORDER_COLOR = "hsl(30deg 3.3% 11.8% / 15%)";
+const TABLE_HEADER_BG = "rgb(243, 242, 240)";
+const TABLE_TEXT_PRIMARY = "#3d3d3a";
+const TABLE_TEXT_MUTED = "#73726c";
 
 // Описание одного документа в списке.
 export type DocumentItem = {
@@ -15,11 +51,14 @@ export type DocumentItem = {
   createdAt: string;
   updatedAt: string;
   updatedBy: string | null;
+  clientName?: string | null;
+  status?: ProposalStatus;
 };
 
 interface ProposalsListProps {
   initialDocuments: DocumentItem[];
   query?: string;
+  statusFilter?: 'all' | ProposalStatus;
 }
 
 // Утилита для копирования ссылки в буфер (с запасным вариантом для старых браузеров).
@@ -51,25 +90,28 @@ const copyToClipboard = async (value: string) => {
   fallback();
 };
 
-// Список предложений: фильтрация по запросу, копирование ссылок и удаление.
-export default function ProposalsList({ initialDocuments, query = "" }: ProposalsListProps) {
+// Список предложений: фильтрация по запросу и статусу, копирование ссылок и удаление.
+export default function ProposalsList({ initialDocuments, query = "", statusFilter = 'all' }: ProposalsListProps) {
   const [documents, setDocuments] = useState(initialDocuments);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copyingId, setCopyingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Удаляем документ и обновляем локальный список.
+  // Удаляем предложение и обновляем локальный список.
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/doc/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/proposals/${id}`, { method: "DELETE" });
       if (!res.ok) {
         throw new Error(await res.text());
       }
       setDocuments((prev) => prev.filter((doc) => doc.id !== id));
     } catch (error) {
-      console.error("Failed to delete document", error);
-      alert("Не удалось удалить документ");
+      console.error("Failed to delete proposal", error);
+      alert("Не удалось удалить предложение");
     } finally {
       setDeletingId(null);
     }
@@ -79,7 +121,7 @@ export default function ProposalsList({ initialDocuments, query = "" }: Proposal
   const handleCopyLink = async (id: string) => {
     try {
       setCopyingId(id);
-      const response = await fetch(`/api/doc/${id}/share`, { method: "POST" });
+      const response = await fetch(`/api/proposals/${id}/share`, { method: "POST" });
       if (!response.ok) {
         throw new Error(await response.text());
       }
@@ -100,29 +142,90 @@ export default function ProposalsList({ initialDocuments, query = "" }: Proposal
     }
   };
 
-  const filtered = useMemo(() => {
-    const value = query.trim().toLowerCase();
-    if (!value) return documents;
-    return documents.filter((doc) =>
-      [doc.title, doc.updatedBy ?? ""].some((field) => field.toLowerCase().includes(value)),
-    );
-  }, [documents, query]);
+  // Дублируем предложение
+  const handleDuplicate = async (id: string) => {
+    setDuplicatingId(id);
+    try {
+      const response = await fetch(`/api/proposals/${id}/duplicate`, { method: "POST" });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      const newProposal = await response.json();
+      // Добавляем новое предложение в начало списка
+      setDocuments((prev) => [
+        {
+          id: newProposal.id,
+          title: newProposal.title,
+          createdAt: newProposal.createdAt,
+          updatedAt: newProposal.updatedAt,
+          updatedBy: newProposal.updatedBy,
+          clientName: null, // Будет загружено при необходимости
+        },
+        ...prev,
+      ]);
+      alert("Предложение успешно дублировано");
+    } catch (error) {
+      console.error("Failed to duplicate proposal", error);
+      alert("Не удалось дублировать предложение");
+    } finally {
+      setDuplicatingId(null);
+    }
+  };
 
-  // Если документов совсем нет, показываем заглушку с кнопкой создания.
+  const filtered = useMemo(() => {
+    let result = documents;
+
+    // Фильтрация по статусу
+    if (statusFilter !== 'all') {
+      result = result.filter((doc) => doc.status === statusFilter);
+    }
+
+    // Фильтрация по текстовому запросу
+    const value = query.trim().toLowerCase();
+    if (value) {
+      result = result.filter((doc) =>
+        [doc.title, doc.updatedBy ?? "", doc.clientName ?? ""].some((field) => field.toLowerCase().includes(value)),
+      );
+    }
+
+    return result;
+  }, [documents, query, statusFilter]);
+
+  // Вычисляем пагинацию
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedDocuments = filtered.slice(startIndex, endIndex);
+
+  // Сбрасываем на первую страницу при изменении фильтров
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, statusFilter]);
+
+  // Не даём текущей странице выйти за границы после удаления/фильтрации.
+  useEffect(() => {
+    if (totalPages === 0) {
+      setCurrentPage(1);
+      return;
+    }
+    setCurrentPage((prev) => Math.min(prev, totalPages));
+  }, [totalPages]);
+
+  // Если предложений совсем нет, показываем заглушку с кнопкой создания.
   if (documents.length === 0) {
     return (
       <Card className="border border-dashed p-0">
         <CardContent className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <CardTitle className="text-base font-semibold text-neutral-900">
-              Пока нет документов
+              Пока нет предложений
             </CardTitle>
             <p className="text-sm text-neutral-500">
               Создайте новое предложение, чтобы начать работу.
             </p>
           </div>
           <Button asChild size="sm" className="self-start">
-            <Link href="/editor">Создать документ</Link>
+            <Link href="/editor">Создать предложение</Link>
           </Button>
         </CardContent>
       </Card>
@@ -139,78 +242,245 @@ export default function ProposalsList({ initialDocuments, query = "" }: Proposal
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {filtered.map((doc) => {
-        const isDeleting = deletingId === doc.id;
-        const isCopying = copyingId === doc.id;
-        const isCopied = copiedId === doc.id;
-
-        return (
-          <Card
-            key={doc.id}
-            className="h-full transition-all duration-150 hover:shadow-md p-0"
-          >
-            <CardContent className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="space-y-2">
-                <CardTitle className="text-base font-semibold text-neutral-900">
-                  {/* Заголовок ведёт в редактор с выбранным документом. */}
-                  <Link
-                    href={`/editor?documentId=${doc.id}`}
-                    className="transition-colors hover:text-neutral-700"
-                  >
-                    {doc.title || "Без названия"}
-                  </Link>
-                </CardTitle>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                  <span>
-                    Обновлено: {new Date(doc.updatedAt).toLocaleDateString("ru-RU")}
-                  </span>
-                  {/* Показываем клиента, если он указан. */}
-                  <Badge variant="outline" className="bg-neutral-100/70">
-                    {doc.updatedBy ? `Клиент: ${doc.updatedBy}` : "Клиент: —"}
-                  </Badge>
+      <div className="flex flex-col gap-4">
+      {/* Таблица */}
+      <div className="overflow-hidden rounded-lg border" style={{ borderColor: TABLE_BORDER_COLOR }}>
+        <div className="overflow-x-auto">
+          <div className="min-w-[960px]">
+            {/* Заголовок таблицы */}
+            <div
+              className="flex h-10 items-center gap-8 border-b"
+              style={{ borderColor: TABLE_BORDER_COLOR, backgroundColor: TABLE_HEADER_BG }}
+            >
+              <div className="min-w-[220px] flex-1 px-[10px] pl-[26px]">
+                <span className="text-[12px] font-medium tracking-tight" style={{ color: TABLE_TEXT_PRIMARY }}>Название</span>
+              </div>
+              <div className="w-[120px] shrink-0 px-2">
+                <span className="text-[12px] font-medium tracking-tight" style={{ color: TABLE_TEXT_PRIMARY }}>Статус</span>
+              </div>
+              <div className="w-[180px] shrink-0 px-2">
+                <span className="text-[12px] font-medium tracking-tight" style={{ color: TABLE_TEXT_PRIMARY }}>Клиент</span>
+              </div>
+              <div className="w-[220px] shrink-0 px-2 pl-6">
+                <span className="text-[12px] font-medium tracking-tight" style={{ color: TABLE_TEXT_PRIMARY }}>Обновлено</span>
+              </div>
+              <div className="shrink-0 px-2" aria-hidden="true">
+                <div className="flex items-center gap-2 opacity-0">
+                  <span className="inline-block size-4" />
+                  <span className="inline-block size-8" />
+                  <span className="inline-block size-8" />
                 </div>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                {/* Кнопка копирования публичной ссылки: меняет текст в зависимости от состояния. */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isCopying}
-                  onClick={() => handleCopyLink(doc.id)}
-                  className="gap-2"
+            </div>
+
+            {/* Тело таблицы */}
+            <div className="bg-white">
+              {paginatedDocuments.map((doc) => {
+                const isDeleting = deletingId === doc.id;
+                const isCopying = copyingId === doc.id;
+                const isCopied = copiedId === doc.id;
+                const isDuplicating = duplicatingId === doc.id;
+
+                return (
+                  <div
+                    key={doc.id}
+                    className="flex items-center gap-8 border-b transition-colors hover:bg-neutral-50"
+                    style={{ borderColor: TABLE_BORDER_COLOR }}
+                  >
+                    {/* Название */}
+                    <div className="min-w-[220px] flex-1 px-[10px] py-2 pl-[26px]">
+                      <Link
+                        href={`/editor?proposalId=${doc.id}`}
+                        className="block truncate text-[14px] font-medium tracking-tight transition-colors hover:text-neutral-700"
+                        style={{ color: TABLE_TEXT_PRIMARY }}
+                      >
+                        {doc.title || "Без названия"}
+                      </Link>
+                    </div>
+
+                    {/* Статус */}
+                    <div className="flex w-[120px] shrink-0 items-center px-2 py-2">
+                      {(() => {
+                        const statusStyle = STATUS_CHIP_STYLES[doc.status ?? "draft"];
+                        return (
+                          <span
+                            className="inline-flex h-[22px] items-center rounded-full border px-[10px] text-[12px] font-medium"
+                            style={{
+                              backgroundColor: statusStyle.backgroundColor,
+                              color: statusStyle.color,
+                              borderColor: statusStyle.borderColor,
+                            }}
+                          >
+                            {statusStyle.label}
+                          </span>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Клиент */}
+                    <div className="flex w-[180px] shrink-0 items-center px-2 py-2">
+                      {doc.clientName ? (
+                        <div
+                          className="flex h-[22px] items-center justify-center rounded-full border px-[10px]"
+                          style={{
+                            backgroundColor: "#F3F2F0",
+                            borderColor: TABLE_BORDER_COLOR,
+                          }}
+                        >
+                          <span className="max-w-[150px] truncate text-[12px] font-medium" style={{ color: TABLE_TEXT_PRIMARY }}>
+                            {doc.clientName}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-neutral-400">—</span>
+                      )}
+                    </div>
+
+                    {/* Обновлено */}
+                    <div className="flex w-[220px] shrink-0 items-center px-2 py-2 pl-6">
+                      <span className="whitespace-nowrap text-[12px] font-medium" style={{ color: "rgb(115, 114, 108)" }}>
+                        {new Date(doc.updatedAt).toLocaleDateString("ru-RU", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric"
+                        })}{" "}
+                        {new Date(doc.updatedAt).toLocaleTimeString("ru-RU", {
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </span>
+                    </div>
+
+                    {/* Действия */}
+                    <div className="flex shrink-0 items-center gap-2 px-2">
+                      <button
+                        type="button"
+                        disabled={isCopying}
+                        onClick={() => handleCopyLink(doc.id)}
+                        className="flex items-center gap-2 transition-colors hover:text-neutral-900 disabled:opacity-50"
+                        style={{ color: TABLE_TEXT_MUTED }}
+                        title={isCopied ? "Скопировано" : "Скопировать ссылку"}
+                      >
+                        {isCopying ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Link2 className="size-4" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isDuplicating}
+                        onClick={() => handleDuplicate(doc.id)}
+                        className="flex size-8 items-center justify-center rounded-md transition-colors hover:bg-neutral-100 hover:text-[var(--field-focus)] disabled:opacity-50"
+                        style={{ color: TABLE_TEXT_MUTED }}
+                        title="Дублировать"
+                      >
+                        {isDuplicating ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Copy className="size-4" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isDeleting}
+                        onClick={() => handleDelete(doc.id)}
+                        className="flex size-8 items-center justify-center rounded-md transition-colors hover:bg-neutral-100 hover:text-red-500 disabled:opacity-50"
+                        style={{ color: TABLE_TEXT_MUTED }}
+                        title="Удалить"
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="size-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Пагинация */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          {/* Левая часть - выбор количества элементов */}
+          <div className="flex items-center gap-2">
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="h-9 rounded-lg border border-[var(--field-border)] bg-white px-[13px] py-[9px] text-xs shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] transition-[color,box-shadow,border-color] focus:border-[var(--field-focus)] focus:outline-none focus:ring-[3px] focus:ring-[var(--field-ring)]"
+              style={{ color: TABLE_TEXT_PRIMARY }}
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+
+          {/* Правая часть - кнопки навигации */}
+          <div className="flex items-center gap-2">
+            <span className="mr-8 text-sm" style={{ color: TABLE_TEXT_MUTED }}>
+              {startIndex + 1}-{Math.min(endIndex, filtered.length)} из {filtered.length}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="flex size-8 items-center justify-center rounded-lg border bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ borderColor: TABLE_BORDER_COLOR, color: TABLE_TEXT_MUTED }}
+              title="Предыдущая страница"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+
+            {/* Номера страниц */}
+            {Array.from({ length: Math.min(6, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 6) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 5 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`flex size-8 items-center justify-center rounded-lg text-sm transition-colors ${
+                    currentPage === pageNum
+                      ? "bg-[#C6613F] text-white"
+                      : "text-neutral-600 hover:bg-neutral-100"
+                  }`}
                 >
-                  {isCopying ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Link2 className="size-4" />
-                  )}
-                  <span className="truncate">
-                    {isCopied ? "Скопировано" : isCopying ? "Копируем…" : "Скопировать ссылку"}
-                  </span>
-                </Button>
-                {/* Кнопка удаления документа с анимацией загрузки. */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  disabled={isDeleting}
-                  onClick={() => handleDelete(doc.id)}
-                  className="text-neutral-500 hover:text-red-500"
-                >
-                  {isDeleting ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="size-4" />
-                  )}
-                  <span className="sr-only">Удалить</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="flex size-8 items-center justify-center rounded-lg border bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ borderColor: TABLE_BORDER_COLOR, color: TABLE_TEXT_MUTED }}
+              title="Следующая страница"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

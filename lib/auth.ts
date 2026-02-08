@@ -5,18 +5,21 @@ import nodemailer from "nodemailer";
 import type { SendVerificationRequestParams } from "next-auth/providers/email";
 import { getServerSession } from "next-auth";
 import type { NextAuthOptions } from "next-auth";
-import type { Provider } from "next-auth/providers";
 import EmailProvider from "next-auth/providers/email";
-import GoogleProvider from "next-auth/providers/google";
-import VKProvider from "next-auth/providers/vk";
-import YandexProvider from "next-auth/providers/yandex";
 
 const authSecret =
   process.env.NEXTAUTH_SECRET ??
   (process.env.NODE_ENV === "development" ? "dev-secret" : undefined);
+const usingDevSecretFallback =
+  !process.env.NEXTAUTH_SECRET && process.env.NODE_ENV === "development";
 
 if (!authSecret) {
   throw new Error("NEXTAUTH_SECRET must be set");
+}
+if (usingDevSecretFallback) {
+  console.warn(
+    "[auth] NEXTAUTH_SECRET is not set. Using insecure development fallback secret.",
+  );
 }
 
 const emailFrom = process.env.EMAIL_FROM ?? "no-reply@offerdoc.app";
@@ -69,13 +72,6 @@ async function sendVerificationRequest({
   }
 }
 
-type OAuthProviderMeta = {
-  id: "google" | "yandex" | "vk";
-  name: string;
-  isConfigured: () => boolean;
-  factory: () => Provider;
-};
-
 type WorkspaceAssignableUser = {
   id: string;
   email?: string | null;
@@ -113,53 +109,10 @@ async function ensureWorkspaceForUser(user: WorkspaceAssignableUser) {
   return workspace.id;
 }
 
-const oauthProvidersMeta: OAuthProviderMeta[] = [
-  {
-    id: "google",
-    name: "Google",
-    isConfigured: () =>
-      Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-    factory: () =>
-      GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        allowDangerousEmailAccountLinking: true,
-      }),
-  },
-  {
-    id: "yandex",
-    name: "Yandex ID",
-    isConfigured: () =>
-      Boolean(process.env.YANDEX_CLIENT_ID && process.env.YANDEX_CLIENT_SECRET),
-    factory: () =>
-      YandexProvider({
-        clientId: process.env.YANDEX_CLIENT_ID!,
-        clientSecret: process.env.YANDEX_CLIENT_SECRET!,
-      }),
-  },
-  {
-    id: "vk",
-    name: "VK ID",
-    isConfigured: () =>
-      Boolean(process.env.VK_CLIENT_ID && process.env.VK_CLIENT_SECRET),
-    factory: () =>
-      VKProvider({
-        clientId: process.env.VK_CLIENT_ID!,
-        clientSecret: process.env.VK_CLIENT_SECRET!,
-      }),
-  },
-];
-
-function optionalOAuthProviders() {
-  return oauthProvidersMeta.filter((meta) => meta.isConfigured()).map((meta) => meta.factory());
-}
-
-export const enabledOAuthProviders = oauthProvidersMeta
-  .filter((meta) => meta.isConfigured())
-  .map((meta) => ({ id: meta.id, name: meta.name }));
+export const enabledOAuthProviders: Array<{ id: string; name: string }> = [];
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as NextAuthOptions["adapter"],
   session: {
     strategy: "database",
     maxAge: 60 * 60 * 24 * 30, // 30 дней
@@ -176,7 +129,6 @@ export const authOptions: NextAuthOptions = {
       maxAge: 15 * 60, // 15 минут
       from: emailFrom,
     }),
-    ...optionalOAuthProviders(),
   ],
   callbacks: {
     async session({ session, user }) {
@@ -196,8 +148,7 @@ export const authOptions: NextAuthOptions = {
       await ensureWorkspaceForUser(user as WorkspaceAssignableUser);
     },
   },
-  debug: process.env.NODE_ENV === "development",
-  trustHost: true,
+  debug: process.env.NODE_ENV === "development" && process.env.NEXTAUTH_DEBUG === "true",
 };
 
 export function getServerAuthSession() {

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import { getServerAuthSession } from "@/lib/auth";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db/prisma";
 
 // Схема валидации для обновления клиента
 const updateClientSchema = z.object({
@@ -96,25 +94,13 @@ export async function PATCH(
       return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
     }
 
-    // Проверяем что клиент существует и принадлежит workspace
-    const existingClient = await prisma.client.findFirst({
-      where: {
-        id,
-        workspaceId: user.workspaceId,
-      },
-    });
-
-    if (!existingClient) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
-    }
-
     // Парсим и валидируем данные
     const body = await request.json();
     const validatedData = updateClientSchema.parse(body);
 
     // Обновляем клиента
     const client = await prisma.client.update({
-      where: { id },
+      where: { id_workspaceId: { id, workspaceId: user.workspaceId } },
       data: {
         ...(validatedData.name && { name: validatedData.name }),
         ...(validatedData.company !== undefined && { company: validatedData.company || null }),
@@ -174,21 +160,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
     }
 
-    // Проверяем что клиент существует и принадлежит workspace
-    const existingClient = await prisma.client.findFirst({
-      where: {
-        id,
-        workspaceId: user.workspaceId,
-      },
-    });
-
-    if (!existingClient) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
-    }
-
     // Удаляем клиента
     await prisma.client.delete({
-      where: { id },
+      where: { id_workspaceId: { id, workspaceId: user.workspaceId } },
     });
 
     return NextResponse.json({ success: true });

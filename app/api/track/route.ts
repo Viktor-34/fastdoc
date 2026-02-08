@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { WORKSPACE_COOKIE, WORKSPACE_HEADER } from '@/lib/workspace-constants';
 import type { Prisma } from '@prisma/client';
+import { apiError, apiSuccess } from '@/lib/api/response';
 
 type TrackBody = { token: string; event: string; uid: string; meta?: Prisma.InputJsonValue; ref?: string };
 
@@ -17,11 +18,11 @@ export async function POST(req: NextRequest) {
   try {
     body = (await req.json()) as TrackBody;
   } catch {
-    return new Response('Bad', { status: 400 });
+    return apiError('Bad', 400);
   }
 
   const { token, event, uid, meta, ref } = body;
-  if (!token || !event || !uid) return new Response('Bad', { status: 400 });
+  if (!token || !event || !uid) return apiError('Bad', 400);
   
   const shareLink = await prisma.shareLink.findUnique({
     where: { token },
@@ -30,17 +31,17 @@ export async function POST(req: NextRequest) {
     },
   });
   
-  if (!shareLink) return new Response('Not found', { status: 404 });
+  if (!shareLink) return apiError('Not found', 404);
 
   const workspaceId = shareLink.Proposal?.workspaceId;
-  if (!workspaceId) return new Response('No workspace', { status: 400 });
+  if (!workspaceId) return apiError('No workspace', 400);
   
   const explicitWorkspace =
     req.headers.get(WORKSPACE_HEADER)?.trim() ??
     req.cookies.get(WORKSPACE_COOKIE)?.value?.trim() ??
     null;
   if (explicitWorkspace && explicitWorkspace !== workspaceId) {
-    return new Response('Forbidden', { status: 403 });
+    return apiError('Forbidden', 403);
   }
 
   await prisma.events.create({
@@ -52,5 +53,5 @@ export async function POST(req: NextRequest) {
       ref,
     },
   });
-  return new Response('ok');
+  return apiSuccess({ ok: true });
 }
