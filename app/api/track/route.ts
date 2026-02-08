@@ -13,20 +13,33 @@ function mergeMeta(meta: Prisma.InputJsonValue | undefined, workspaceId: string)
 }
 
 export async function POST(req: NextRequest) {
-  const { token, event, uid, meta, ref } = (await req.json()) as TrackBody;
+  let body: TrackBody;
+  try {
+    body = (await req.json()) as TrackBody;
+  } catch {
+    return new Response('Bad', { status: 400 });
+  }
+
+  const { token, event, uid, meta, ref } = body;
   if (!token || !event || !uid) return new Response('Bad', { status: 400 });
+  
   const shareLink = await prisma.shareLink.findUnique({
     where: { token },
-    include: { document: { select: { workspaceId: true } } },
+    include: { 
+      Proposal: { select: { workspaceId: true } },
+    },
   });
+  
   if (!shareLink) return new Response('Not found', { status: 404 });
 
-  const documentWorkspace = shareLink.document.workspaceId;
+  const workspaceId = shareLink.Proposal?.workspaceId;
+  if (!workspaceId) return new Response('No workspace', { status: 400 });
+  
   const explicitWorkspace =
     req.headers.get(WORKSPACE_HEADER)?.trim() ??
     req.cookies.get(WORKSPACE_COOKIE)?.value?.trim() ??
     null;
-  if (explicitWorkspace && explicitWorkspace !== documentWorkspace) {
+  if (explicitWorkspace && explicitWorkspace !== workspaceId) {
     return new Response('Forbidden', { status: 403 });
   }
 
@@ -35,7 +48,7 @@ export async function POST(req: NextRequest) {
       token,
       event,
       uid,
-      meta: mergeMeta(meta, documentWorkspace),
+      meta: mergeMeta(meta, workspaceId),
       ref,
     },
   });
