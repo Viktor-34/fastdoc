@@ -37,11 +37,7 @@ export default async function ProfileSettingsPage() {
 
   return (
     <div className="flex min-h-svh flex-1 flex-col bg-white shadow-sm">
-      <SiteHeader
-        label="Настройки"
-        title="Профиль и рабочая область"
-        description="Обновите имя, которое видят коллеги и ваши клиенты."
-      />
+      <SiteHeader title="Профиль и рабочая область" />
       <main className="mx-auto flex w-full flex-1 flex-col gap-6 bg-white px-4 pb-10 pt-6 md:px-6">
         <ProfileForm
           initialName={user.name ?? ""}

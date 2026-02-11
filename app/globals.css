@@ -5,8 +5,12 @@
 
 :root {
   color-scheme: light;
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --field-border: var(--color-neutral-200);
+  --field-focus: #1b67b2b3;
+  --field-ring: transparent;
+  --field-placeholder: #73726c;
+  --sidebar: #F7F7F5;
+  --sidebar-foreground: #3D3D3A;
   --sidebar-primary: hsl(240 5.9% 10%);
   --sidebar-primary-foreground: hsl(0 0% 98%);
   --sidebar-accent: hsl(240 4.8% 95.9%);
@@ -153,6 +157,10 @@ body {
 }
 
 .dark {
+  --field-border: var(--color-neutral-800);
+  --field-focus: #1b67b2b3;
+  --field-ring: transparent;
+  --field-placeholder: #a1a1aa;
   --sidebar: hsl(240 5.9% 10%);
   --sidebar-foreground: hsl(240 4.8% 95.9%);
   --sidebar-primary: hsl(224.3 76.3% 48%);
@@ -165,7 +173,7 @@ body {
 
 @theme inline {
   --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-foreground: #3D3D3A;
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);

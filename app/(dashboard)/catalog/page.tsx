@@ -15,7 +15,7 @@ export default async function CatalogPage() {
   // Загружаем товары этой рабочей области с расшифровкой цен.
   const products = await prisma.product.findMany({
     where: { workspaceId },
-    include: { priceItems: true },
+    include: { PriceItem: true },
     orderBy: { updatedAt: "desc" },
   });
 
@@ -76,14 +76,12 @@ export default async function CatalogPage() {
 
   return (
     <div className="flex min-h-svh flex-1 flex-col bg-white shadow-sm">
-      <SiteHeader
-        label="Каталог"
-        title="Каталог товаров"
-        description="Используйте готовые позиции для блока «Таблица цен»."
-      />
+      <SiteHeader title="Каталог товаров" />
       <main className="mx-auto flex w-full flex-1 flex-col gap-6 bg-white px-4 pb-10 pt-6 md:px-6">
         {/* Плашки с ключевыми показателями. */}
-        <SectionCards cards={statsCards} />
+        <div className="rounded-[12px] bg-[#F3F2F0] p-[12px]">
+          <SectionCards cards={statsCards} className="gap-4" />
+        </div>
         {/* Таблица товаров с поиском. */}
         <CatalogTable initialProducts={serialized} />
       </main>
