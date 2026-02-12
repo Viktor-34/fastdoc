@@ -24,7 +24,21 @@ export default async function ProfileSettingsPage() {
     session.user.workspaceId
       ? prisma.workspace.findUnique({
           where: { id: session.user.workspaceId },
-          select: { name: true },
+          select: {
+            name: true,
+            logoUrl: true,
+            signatureUrl: true,
+            stampUrl: true,
+            companyName: true,
+            inn: true,
+            ogrn: true,
+            legalAddress: true,
+            bankName: true,
+            bik: true,
+            accountNumber: true,
+            vatDefault: true,
+            vatRate: true,
+          },
         })
       : null,
   ]);
@@ -33,7 +47,8 @@ export default async function ProfileSettingsPage() {
     redirect("/auth/signin");
   }
 
-  const canEditWorkspace = user.role === "OWNER" || user.role === "ADMIN";
+  // Каждый пользователь — владелец своего рабочего пространства.
+  const canEditWorkspace = true;
 
   return (
     <div className="flex min-h-svh flex-1 flex-col bg-white shadow-sm">
@@ -42,7 +57,8 @@ export default async function ProfileSettingsPage() {
         <ProfileForm
           initialName={user.name ?? ""}
           email={user.email}
-          workspaceName={workspace?.name}
+          workspaceId={session.user.workspaceId ?? ""}
+          workspaceData={workspace}
           canEditWorkspace={canEditWorkspace}
         />
       </main>

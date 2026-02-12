@@ -1,6 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { isProductAdmin } from "@/lib/admin";
 import nodemailer from "nodemailer";
 import type { SendVerificationRequestParams } from "next-auth/providers/email";
 import { getServerSession } from "next-auth";
@@ -36,6 +37,13 @@ const emailConfigured =
   Boolean(emailUser) &&
   Boolean(emailPassword);
 
+if (!emailConfigured && process.env.NODE_ENV === "production") {
+  console.warn(
+    "[auth] ⚠️  SMTP не настроен (EMAIL_SERVER_HOST/PORT/USER/PASSWORD). " +
+      "Пользователи НЕ смогут войти через magic-link!",
+  );
+}
+
 const emailTransport = emailConfigured
   ? nodemailer.createTransport({
       host: emailHost,
@@ -52,6 +60,34 @@ const emailTransport = emailConfigured
       newline: "unix",
     });
 
+function buildMagicLinkHtml(url: string): string {
+  return `
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background-color:#f7f7f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f7f5;padding:40px 0">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;padding:40px;max-width:480px">
+        <tr><td>
+          <h2 style="margin:0 0 16px;color:#3d3d3a;font-size:20px">Вход в Offerdoc</h2>
+          <p style="margin:0 0 24px;color:#6b6b68;font-size:15px;line-height:1.5">
+            Нажмите кнопку ниже, чтобы войти в систему. Ссылка действует 15 минут.
+          </p>
+          <table cellpadding="0" cellspacing="0" style="margin:0 0 24px"><tr><td style="background-color:#3d3d3a;border-radius:8px;padding:12px 32px">
+            <a href="${url}" style="color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;display:inline-block">Войти</a>
+          </td></tr></table>
+          <p style="margin:0;color:#a0a09c;font-size:13px;line-height:1.4">
+            Если вы не запрашивали вход — просто проигнорируйте это письмо.
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`.trim();
+}
+
 async function sendVerificationRequest({
   identifier,
   url,
@@ -60,8 +96,8 @@ async function sendVerificationRequest({
     to: identifier,
     from: emailFrom,
     subject: "Ваш вход в Offerdoc",
-    text: `Здравствуйте!\n\nПерейдите по ссылке, чтобы войти:\n${url}\n\nСсылка действует 15 минут.`,
-    html: `<p>Здравствуйте!</p><p>Перейдите по ссылке, чтобы войти:</p><p><a href="${url}">Войти в Offerdoc</a></p><p>Ссылка действует 15 минут.</p>`,
+    text: `Здравствуйте!\n\nПерейдите по ссылке, чтобы войти:\n${url}\n\nСсылка действует 15 минут.\n\nЕсли вы не запрашивали вход — просто проигнорируйте это письмо.`,
+    html: buildMagicLinkHtml(url),
   });
 
   if (!emailConfigured) {
@@ -98,11 +134,15 @@ async function ensureWorkspaceForUser(user: WorkspaceAssignableUser) {
     },
   });
 
+  // Роль OWNER назначается только администраторам продукта (ADMIN_EMAILS),
+  // все остальные получают USER (Prisma default).
+  const role = isProductAdmin(user.email) ? "OWNER" : "USER";
+
   await prisma.user.update({
     where: { id: user.id },
     data: {
       workspaceId: workspace.id,
-      role: "OWNER",
+      role,
     },
   });
 
@@ -136,6 +176,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = user.id;
         session.user.role = user.role as Role;
         session.user.workspaceId = user.workspaceId;
+        session.user.isAdmin = isProductAdmin(session.user.email);
       }
       return session;
     },

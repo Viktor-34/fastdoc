@@ -5,8 +5,12 @@ import path from "path";
 
 import { getServerAuthSession } from "@/lib/auth";
 import { getActiveWorkspaceId } from "@/lib/workspace";
+import { isS3Configured, uploadToS3 } from "@/lib/s3";
+import { createRateLimiter } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
+
+const checkRate = createRateLimiter("workspace-upload", { limit: 20, windowMs: 60_000 });
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -42,7 +46,18 @@ function sanitizeSegment(value: string) {
   return value.replace(/[^a-z0-9\-_.]/gi, "_");
 }
 
+const MIME_MAP: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+};
+
 export async function POST(request: NextRequest) {
+  const blocked = checkRate(request);
+  if (blocked) return blocked;
+
   try {
     const session = await getServerAuthSession();
     if (!session?.user) {
@@ -51,7 +66,6 @@ export async function POST(request: NextRequest) {
 
     const workspaceId = await getActiveWorkspaceId(session.user.workspaceId);
     const workspaceSegment = sanitizeSegment(workspaceId);
-    const workspaceDir = path.join(UPLOAD_DIR, workspaceSegment);
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -103,18 +117,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid image signature" }, { status: 400 });
     }
 
-    // Создаём директорию
-    await mkdir(workspaceDir, { recursive: true });
-
     // Генерируем имя файла с префиксом для идентификации
     const prefix = field ? `${field}_` : "";
     const safeName = file.name.replace(/[^a-z0-9.\-_]+/gi, "_");
     const fileName = `${prefix}${randomUUID()}_${safeName}`;
-    const filePath = path.join(workspaceDir, fileName);
 
-    await writeFile(filePath, buffer);
+    let url: string;
 
-    const url = `/uploads/${workspaceSegment}/${fileName}`;
+    if (isS3Configured()) {
+      // Загружаем в S3.
+      const key = `uploads/${workspaceSegment}/${fileName}`;
+      const contentType = file.type || MIME_MAP[extension] || "application/octet-stream";
+      url = await uploadToS3({ key, body: buffer, contentType });
+    } else {
+      // Локальное сохранение (dev-режим).
+      const workspaceDir = path.join(UPLOAD_DIR, workspaceSegment);
+      await mkdir(workspaceDir, { recursive: true });
+      const filePath = path.join(workspaceDir, fileName);
+      await writeFile(filePath, buffer);
+      url = `/uploads/${workspaceSegment}/${fileName}`;
+    }
+
     return NextResponse.json({ url, workspaceId });
   } catch (error) {
     console.error("POST /api/workspace/upload error:", error);

@@ -76,20 +76,18 @@ async function launchWithSparticuz(puppeteer: PuppeteerModule['default']) {
   const executablePath = await chromium.executablePath();
   return puppeteer.launch({
     args: chromium.args,
-    defaultViewport: chromium.defaultViewport ?? { width: 1280, height: 720 },
+    defaultViewport: { width: 1280, height: 720 },
     executablePath: executablePath ?? undefined,
-    headless: chromium.headless ?? true,
+    headless: true,
   });
 }
 
 function isServerlessEnvironment() {
   return (
-    process.platform === 'linux' ||
     Boolean(process.env.AWS_REGION) ||
     Boolean(process.env.AWS_EXECUTION_ENV) ||
     Boolean(process.env.VERCEL) ||
-    Boolean(process.env.NETLIFY) ||
-    Boolean(process.env.CHROME_BINARY_PATH)
+    Boolean(process.env.NETLIFY)
   );
 }
 
@@ -97,24 +95,37 @@ export async function launchPdfBrowser() {
   const puppeteerModule = await import('puppeteer-core');
   const puppeteer = puppeteerModule.default;
 
+  // На serverless-платформах сразу используем @sparticuz/chromium,
+  // т.к. там нет системного браузера.
   if (isServerlessEnvironment()) {
     return launchWithSparticuz(puppeteer);
   }
 
+  // На обычном сервере / локальной машине — ищем системный Chrome/Chromium.
   const executablePath = await resolveLocalExecutable();
   if (executablePath) {
     try {
       return await puppeteer.launch({
         executablePath,
-        headless: 'new',
-        args: ['--no-sandbox', '--disable-gpu'],
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+        ],
       });
     } catch (error) {
       console.warn('[pdf] Не удалось запустить локальный Chrome, используем @sparticuz/chromium.', error);
     }
   } else {
-    console.warn('[pdf] Локальный Chrome не найден, переключаемся на @sparticuz/chromium.');
+    console.warn(
+      '[pdf] ⚠️  Локальный Chrome/Chromium не найден. Переключаемся на @sparticuz/chromium.\n' +
+        '     Для VPS рекомендуется установить: sudo apt install -y chromium-browser\n' +
+        '     Или задать CHROME_EXECUTABLE_PATH в .env',
+    );
   }
 
+  // Fallback на @sparticuz/chromium.
   return launchWithSparticuz(puppeteer);
 }

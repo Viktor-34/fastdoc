@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { FilePlus2, LayoutPanelLeftIcon, ListIcon, LogOut, PenSquare, Settings } from "lucide-react"
+import { FilePlus2, LayoutPanelLeftIcon, ListIcon, LogOut, PenSquare, Settings, ShieldCheck, Users } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
 
@@ -32,6 +32,11 @@ const NAV_ITEMS = [
     icon: LayoutPanelLeftIcon,
   },
   {
+    title: "Клиенты",
+    href: "/clients",
+    icon: Users,
+  },
+  {
     title: "Новый документ",
     href: "/editor",
     icon: PenSquare,
@@ -43,12 +48,21 @@ const NAV_ITEMS = [
   },
 ]
 
+// Пункт меню, доступный только владельцу (OWNER).
+const ADMIN_NAV_ITEM = {
+  title: "Админ-панель",
+  href: "/admin",
+  icon: ShieldCheck,
+}
+
 // Основной сайдбар приложения со статичными ссылками и кнопкой создания документа.
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Получаем текущий путь, чтобы подсветить активный пункт меню.
   const pathname = usePathname()
   const { data } = useSession()
   const user = data?.user
+  const isAdmin = user?.isAdmin === true
+  const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS
   const initials = (user?.name || user?.email || "?")
     .split(" ")
     .map((part) => part[0])
@@ -77,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Навигация</SidebarGroupLabel>
           <SidebarMenu>
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               // Для главной страницы сравниваем точное совпадение, для остальных — по префиксу.
               const isActive =
                 item.href === "/"

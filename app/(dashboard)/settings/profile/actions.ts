@@ -9,7 +9,7 @@ import { prisma } from "@/lib/db/prisma";
 
 const profileSchema = z.object({
   name: z
-    .string({ required_error: "Укажите имя" })
+    .string()
     .trim()
     .min(1, "Минимум 1 символ")
     .max(100, "Максимум 100 символов"),
@@ -17,7 +17,7 @@ const profileSchema = z.object({
 
 const workspaceSchema = z.object({
   name: z
-    .string({ required_error: "Название обязательно" })
+    .string()
     .trim()
     .min(1, "Минимум 1 символ")
     .max(120, "Максимум 120 символов"),
@@ -36,7 +36,7 @@ export async function updateProfile(formData: FormData) {
   if (!submission.success) {
     return {
       ok: false,
-      message: submission.error.errors.at(0)?.message ?? "Некорректные данные",
+      message: submission.error.issues.at(0)?.message ?? "Некорректные данные",
     };
   }
 
@@ -64,7 +64,7 @@ export async function updateWorkspace(formData: FormData) {
   if (!submission.success) {
     return {
       ok: false,
-      message: submission.error.errors.at(0)?.message ?? "Некорректные данные",
+      message: submission.error.issues.at(0)?.message ?? "Некорректные данные",
     };
   }
 
@@ -73,12 +73,13 @@ export async function updateWorkspace(formData: FormData) {
     return { ok: false, message: "Не найдено рабочее пространство" };
   }
 
+  // Каждый пользователь — владелец своего рабочего пространства, проверяем принадлежность.
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { role: true },
+    select: { workspaceId: true },
   });
 
-  if (!user || (user.role !== "OWNER" && user.role !== "ADMIN")) {
+  if (!user || user.workspaceId !== workspaceId) {
     return { ok: false, message: "Недостаточно прав для изменения" };
   }
 

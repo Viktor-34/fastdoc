@@ -3,6 +3,9 @@ import { z } from "zod";
 import { getServerAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
 import { proposalPatchSchema, proposalSchema } from "@/lib/types/proposal-schema";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+const checkRate = createRateLimiter("proposals", { limit: 60, windowMs: 60_000 });
 
 const parseValidUntil = (value: unknown): Date | null | undefined => {
   if (value === undefined) return undefined;
@@ -13,7 +16,10 @@ const parseValidUntil = (value: unknown): Date | null | undefined => {
 };
 
 // GET /api/proposals - получить все КП workspace
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const blocked = checkRate(request);
+  if (blocked) return blocked;
+
   try {
     const session = await getServerAuthSession();
     if (!session?.user?.workspaceId) {
@@ -43,6 +49,9 @@ export async function GET() {
 
 // POST /api/proposals - создать новое КП
 export async function POST(request: NextRequest) {
+  const blocked = checkRate(request);
+  if (blocked) return blocked;
+
   try {
     const session = await getServerAuthSession();
     if (!session?.user?.workspaceId) {

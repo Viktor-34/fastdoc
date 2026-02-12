@@ -108,7 +108,7 @@ model User {
   email         String     @unique
   name          String?
   workspaceId   String?
-  role          Role       @default(EDITOR)
+  role          Role       @default(USER)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   emailVerified DateTime?
@@ -262,7 +262,5 @@ model ProposalTemplate {
 
 enum Role {
   OWNER
-  ADMIN
-  EDITOR
-  VIEWER
+  USER
 }

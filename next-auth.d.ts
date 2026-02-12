@@ -7,6 +7,7 @@ declare module "next-auth" {
       id: string;
       role: Role;
       workspaceId?: string | null;
+      isAdmin?: boolean;
     };
   }
 
