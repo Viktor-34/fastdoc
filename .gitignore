@@ -49,3 +49,6 @@ public/uploads/
 
 # local dev diagnostics
 /.logs/
+/.codex-runtime/
+/.cursor/
+/.next_cache_backup_*/
