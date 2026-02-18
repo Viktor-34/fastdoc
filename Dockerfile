@@ -3,6 +3,9 @@ FROM node:20-bookworm-slim
 WORKDIR /app
 
 COPY package*.json ./
+# prisma/schema.prisma must exist before npm postinstall (prisma generate)
+COPY prisma ./prisma
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN npm ci
 
 COPY . .
