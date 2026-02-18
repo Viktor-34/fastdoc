@@ -33,19 +33,19 @@ export function SectionCards({ cards, className }: SectionCardsProps) {
       {cards.map(({ title, value, badge }) => (
         <Card
           key={title}
-          className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white px-5 py-4 shadow-sm"
+          className="flex flex-col gap-4 rounded-xl border-0 bg-white px-[21px] py-[17px] shadow-[0_1px_1px_0_rgba(0,0,0,0.06),_0_0_1px_0_rgba(0,0,0,0.3)]"
         >
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-neutral-500">{title}</p>
-            <p className="text-2xl font-semibold text-neutral-900 tabular-nums">{value}</p>
+          <div className="flex flex-col gap-3">
+            <p className="text-xs font-medium tracking-tight text-[#737373]">{title}</p>
+            <p className="text-2xl font-semibold leading-[1.33] text-[#0F172B] tabular-nums">{value}</p>
           </div>
           {badge ? (
             <Badge
               variant="outline"
-              className="w-fit gap-1 rounded-full border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700"
+              className="w-fit items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-[13px] py-[5px] text-[11px] font-medium leading-[1.33] text-[#404040]"
             >
               {/* Если есть иконка, показываем её рядом с подписью бейджа. */}
-              {badge.icon ? <badge.icon className="size-3.5" /> : null}
+              {badge.icon ? <badge.icon className="size-3 text-[#FF5929]" /> : null}
               {badge.label}
             </Badge>
           ) : null}

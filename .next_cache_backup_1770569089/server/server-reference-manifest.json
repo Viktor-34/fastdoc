@@ -1,0 +1,161 @@
+{
+  "node": {
+    "002f90e9f28f01f51c6bc3d9e64934068e8dbee18c": {
+      "workers": {
+        "app/api/upload/route": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/catalog/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/templates/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/settings/profile/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/clients/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/clients/new/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/api/upload/route": "rsc",
+        "app/(dashboard)/page": "rsc",
+        "app/(dashboard)/catalog/page": "rsc",
+        "app/(dashboard)/templates/page": "rsc",
+        "app/(dashboard)/settings/profile/page": "rsc",
+        "app/(dashboard)/clients/page": "rsc",
+        "app/(dashboard)/clients/new/page": "rsc"
+      },
+      "filename": "lib/workspace.ts",
+      "exportedName": "clearWorkspaceCookie"
+    },
+    "4031bae99acff8a65581cf1532317a5508beed46bc": {
+      "workers": {
+        "app/api/upload/route": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/catalog/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/templates/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/settings/profile/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/clients/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/clients/new/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/api/upload/route": "rsc",
+        "app/(dashboard)/page": "rsc",
+        "app/(dashboard)/catalog/page": "rsc",
+        "app/(dashboard)/templates/page": "rsc",
+        "app/(dashboard)/settings/profile/page": "rsc",
+        "app/(dashboard)/clients/page": "rsc",
+        "app/(dashboard)/clients/new/page": "rsc"
+      },
+      "filename": "lib/workspace.ts",
+      "exportedName": "setActiveWorkspaceCookie"
+    },
+    "403414bbf6bfb8358b1505190ed92db358d812d67d": {
+      "workers": {
+        "app/api/upload/route": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/catalog/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/templates/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/settings/profile/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/clients/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/(dashboard)/clients/new/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Flib%2Fworkspace.ts%22%2C%5B%7B%22id%22%3A%22002f90e9f28f01f51c6bc3d9e64934068e8dbee18c%22%2C%22exportedName%22%3A%22clearWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%224031bae99acff8a65581cf1532317a5508beed46bc%22%2C%22exportedName%22%3A%22setActiveWorkspaceCookie%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%2C%7B%22id%22%3A%22403414bbf6bfb8358b1505190ed92db358d812d67d%22%2C%22exportedName%22%3A%22getActiveWorkspaceId%22%2C%22filename%22%3A%22lib%2Fworkspace.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/api/upload/route": "rsc",
+        "app/(dashboard)/page": "rsc",
+        "app/(dashboard)/catalog/page": "rsc",
+        "app/(dashboard)/templates/page": "rsc",
+        "app/(dashboard)/settings/profile/page": "rsc",
+        "app/(dashboard)/clients/page": "rsc",
+        "app/(dashboard)/clients/new/page": "rsc"
+      },
+      "filename": "lib/workspace.ts",
+      "exportedName": "getActiveWorkspaceId"
+    },
+    "40929c7f9e983fdfe68d50a71b6c1a45f8aab06ca1": {
+      "workers": {
+        "app/(dashboard)/settings/profile/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Fapp%2F(dashboard)%2Fsettings%2Fprofile%2Factions.ts%22%2C%5B%7B%22id%22%3A%2240929c7f9e983fdfe68d50a71b6c1a45f8aab06ca1%22%2C%22exportedName%22%3A%22updateProfile%22%2C%22filename%22%3A%22app%2F(dashboard)%2Fsettings%2Fprofile%2Factions.ts%22%7D%2C%7B%22id%22%3A%22409fb29edd64787d7a1e017a4d5c589242f741ad11%22%2C%22exportedName%22%3A%22updateWorkspace%22%2C%22filename%22%3A%22app%2F(dashboard)%2Fsettings%2Fprofile%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(dashboard)/settings/profile/page": "action-browser"
+      },
+      "filename": "app/(dashboard)/settings/profile/actions.ts",
+      "exportedName": "updateProfile"
+    },
+    "409fb29edd64787d7a1e017a4d5c589242f741ad11": {
+      "workers": {
+        "app/(dashboard)/settings/profile/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fviktor%2FDesktop%2Ffastdoc%2Fapp%2F(dashboard)%2Fsettings%2Fprofile%2Factions.ts%22%2C%5B%7B%22id%22%3A%2240929c7f9e983fdfe68d50a71b6c1a45f8aab06ca1%22%2C%22exportedName%22%3A%22updateProfile%22%2C%22filename%22%3A%22app%2F(dashboard)%2Fsettings%2Fprofile%2Factions.ts%22%7D%2C%7B%22id%22%3A%22409fb29edd64787d7a1e017a4d5c589242f741ad11%22%2C%22exportedName%22%3A%22updateWorkspace%22%2C%22filename%22%3A%22app%2F(dashboard)%2Fsettings%2Fprofile%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(dashboard)/settings/profile/page": "action-browser"
+      },
+      "filename": "app/(dashboard)/settings/profile/actions.ts",
+      "exportedName": "updateWorkspace"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "vaYNADF1PwKooux/mWIUjt83bQ14a6LAuiGNGHoq2ow="
+}

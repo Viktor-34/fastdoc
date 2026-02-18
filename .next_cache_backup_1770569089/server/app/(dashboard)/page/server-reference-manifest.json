@@ -1,0 +1,50 @@
+{
+  "node": {
+    "005558b0b3f57ca35dd6d22ef9c73e7c1695045404": {
+      "workers": {
+        "app/(dashboard)/page": {
+          "moduleId": "89299",
+          "async": false,
+          "exportedName": "clearWorkspaceCookie",
+          "filename": "lib/workspace.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/page": "rsc"
+      },
+      "exportedName": "clearWorkspaceCookie",
+      "filename": "lib/workspace.ts"
+    },
+    "4037c016b1cc27a5e2b30306537c59cd24672dffcb": {
+      "workers": {
+        "app/(dashboard)/page": {
+          "moduleId": "89299",
+          "async": false,
+          "exportedName": "setActiveWorkspaceCookie",
+          "filename": "lib/workspace.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/page": "rsc"
+      },
+      "exportedName": "setActiveWorkspaceCookie",
+      "filename": "lib/workspace.ts"
+    },
+    "404d1708a0cc5c4833497c01cc30a972ef370e2420": {
+      "workers": {
+        "app/(dashboard)/page": {
+          "moduleId": "89299",
+          "async": false,
+          "exportedName": "getActiveWorkspaceId",
+          "filename": "lib/workspace.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/page": "rsc"
+      },
+      "exportedName": "getActiveWorkspaceId",
+      "filename": "lib/workspace.ts"
+    }
+  },
+  "edge": {}
+}

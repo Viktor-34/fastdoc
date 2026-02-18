@@ -137,58 +137,70 @@ export async function POST(req: NextRequest) {
       workspace: workspace || undefined,
       client: client || undefined,
     });
-    
-    const browser = await launchPdfBrowser();
-    const page = await browser.newPage();
-    
-    // Устанавливаем content с оптимизированными настройками
-    await page.setContent(html, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000 
-    });
-    
-    // Ждем загрузки изображений
-    await page.evaluate(() => {
-      return Promise.all(
-        Array.from(document.images)
-          .filter(img => !img.complete)
-          .map(img => new Promise(resolve => {
-            img.onload = img.onerror = resolve;
-          }))
-      );
-    });
-    
-    const pdf = await page.pdf({
-      format: 'A4',
-      margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' },
-      printBackground: true,
-      preferCSSPageSize: true,
-    });
-    
-    await browser.close();
 
-    const body = new Uint8Array(pdf);
-    const pdfBuffer = Buffer.from(pdf);
-    
-    // Сохраняем в кеш асинхронно
-    setCachedPdf(cacheKey, pdfBuffer).catch(err => 
-      console.error('[PDF] Failed to cache:', err)
-    );
-    
-    // Кодируем имя файла для поддержки кириллицы в заголовке
-    const encodedFilename = encodeURIComponent(pdfFilename);
-    const asciiFilename = pdfFilename.replace(/[^\x00-\x7F]/g, '_'); // Fallback для старых браузеров
-    
-    return new Response(body, {
-      headers: {
-        'content-type': 'application/pdf',
-        // RFC 5987 формат для поддержки UTF-8 имён файлов
-        'content-disposition': `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
-        // Возвращаем workspaceId в заголовке, чтобы клиент мог синхронизироваться.
-        [WORKSPACE_HEADER]: workspaceId,
-        'x-cache': 'MISS',
+    let browser: Awaited<ReturnType<typeof launchPdfBrowser>> | null = null;
+    try {
+      browser = await launchPdfBrowser();
+      const page = await browser.newPage();
+
+      // Быстрый рендер без ожидания вечного network idle.
+      await page.setContent(html, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000,
+      });
+
+      // Ждём изображения, но не дольше 10 секунд.
+      await page.evaluate(async () => {
+        const pending = Array.from(document.images)
+          .filter((img) => !img.complete)
+          .map(
+            (img) =>
+              new Promise<void>((resolve) => {
+                img.onload = () => resolve();
+                img.onerror = () => resolve();
+              }),
+          );
+
+        await Promise.race([
+          Promise.all(pending),
+          new Promise<void>((resolve) => setTimeout(resolve, 10000)),
+        ]);
+      });
+
+      const pdf = await page.pdf({
+        format: 'A4',
+        margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' },
+        printBackground: true,
+        preferCSSPageSize: true,
+      });
+
+      const body = new Uint8Array(pdf);
+      const pdfBuffer = Buffer.from(pdf);
+
+      // Сохраняем в кеш асинхронно
+      setCachedPdf(cacheKey, pdfBuffer).catch((err) => console.error('[PDF] Failed to cache:', err));
+
+      // Кодируем имя файла для поддержки кириллицы в заголовке
+      const encodedFilename = encodeURIComponent(pdfFilename);
+      const asciiFilename = pdfFilename.replace(/[^\x00-\x7F]/g, '_'); // Fallback для старых браузеров
+
+      return new Response(body, {
+        headers: {
+          'content-type': 'application/pdf',
+          // RFC 5987 формат для поддержки UTF-8 имён файлов
+          'content-disposition': `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
+          // Возвращаем workspaceId в заголовке, чтобы клиент мог синхронизироваться.
+          [WORKSPACE_HEADER]: workspaceId,
+          'x-cache': 'MISS',
+        },
+      });
+    } finally {
+      if (browser) {
+        await browser.close().catch((closeError) => {
+          console.error('[PDF] Failed to close browser:', closeError);
+        });
       }
-    });
+    }
   } catch (error) {
     console.error('PDF generation failed', error);
     return apiError('Failed to generate PDF', 500);

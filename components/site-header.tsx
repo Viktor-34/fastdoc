@@ -3,12 +3,14 @@
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
 interface SiteHeaderProps {
+  label?: string
   title: string
+  description?: string
   actions?: React.ReactNode
 }
 
 // Заголовок страницы внутри приложения: показывает название и дополнительные действия.
-export function SiteHeader({ title, actions }: SiteHeaderProps) {
+export function SiteHeader({ label, title, description, actions }: SiteHeaderProps) {
   return (
     /* Фиксируем шапку сверху и отделяем её тонкой линией. */
     <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white">
@@ -19,7 +21,11 @@ export function SiteHeader({ title, actions }: SiteHeaderProps) {
           {/* Вертикальный разделитель между триггером и заголовком. */}
           <span className="h-6 w-px bg-neutral-200" aria-hidden="true" />
           {/* Основной заголовок текущей страницы. */}
-          <h1 className="text-base font-medium text-neutral-900">{title}</h1>
+          <div className="flex flex-col">
+            {label && <span className="text-xs text-neutral-500">{label}</span>}
+            <h1 className="text-base font-medium text-neutral-900">{title}</h1>
+            {description && <p className="text-xs text-neutral-500">{description}</p>}
+          </div>
         </div>
         {/* Слот для кнопок или других действий справа, если они переданы. */}
         {actions ? <div className="shrink-0">{actions}</div> : null}

@@ -1,0 +1,188 @@
+/**
+ * Специализированные стили для печати и PDF генерации
+ * Оптимизированы для корректного отображения в Puppeteer
+ */
+
+@media print {
+  /* Базовые настройки страницы */
+  @page {
+    size: A4;
+    margin: 20mm 15mm;
+  }
+
+  /* Сброс фона и теней для экономии чернил */
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Убираем внешние элементы интерфейса */
+  .public-preview {
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  .public-preview .page {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Скрываем элементы UI */
+  .download-button,
+  .editor-controls,
+  .sidebar,
+  .navigation,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Предотвращаем разрывы страниц внутри важных элементов */
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid;
+    page-break-after: avoid;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Блоки контента должны оставаться цельными */
+  .logo-section,
+  .features-section,
+  .feature-item,
+  .two-columns,
+  .text-image-section,
+  .image-block,
+  pre,
+  blockquote,
+  table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Абзацы и списки */
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  ul, ol {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Изображения */
+  img {
+    max-width: 100% !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Ссылки - показываем URL */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 85%;
+    color: #666;
+  }
+
+  /* Цвета фона должны печататься */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Оптимизация сеток для печати */
+  .two-columns {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .features-section__inner {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* Улучшенная типографика для печати */
+  body {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  h1 { font-size: 24pt !important; }
+  h2 { font-size: 20pt !important; }
+  h3 { font-size: 16pt !important; }
+  h4 { font-size: 14pt !important; }
+
+  /* Код и моноширинные блоки */
+  pre, code {
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd !important;
+    padding: 8pt !important;
+    font-size: 9pt !important;
+  }
+
+  /* Разделители */
+  .spacer-block[data-variant="divider-solid"],
+  .spacer-block[data-variant="divider-dashed"] {
+    margin: 12pt 0 !important;
+  }
+
+  /* Секции с фоном */
+  .logo-section {
+    padding: 16pt !important;
+    margin: 8pt 0 !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  .features-section,
+  .text-image-section,
+  .gallery-section {
+    padding-top: 16pt !important;
+    padding-bottom: 16pt !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 8pt 0 !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  /* Сетка для text-image-section */
+  .text-image-section__inner {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/**
+ * Дополнительные стили для PDF рендера через Puppeteer
+ * (применяются в обычном режиме, но оптимизированы для PDF)
+ */
+.pdf-render {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1f2937;
+}
+
+.pdf-render .page {
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.pdf-render img {
+  max-width: 100%;
+  height: auto;
+}
+
+.pdf-render pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

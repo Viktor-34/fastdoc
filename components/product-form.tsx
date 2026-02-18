@@ -1,14 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import type { ChangeEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -44,11 +42,14 @@ type ProductFormProps = {
   workspaceId?: string;
 };
 
-type FieldErrors = Partial<Record<keyof ProductFormState, string>> & {
+type FieldErrors = Partial<Record<Exclude<keyof ProductFormState, "priceItems">, string>> & {
   priceItems?: string[];
 };
 
 const currencyOptions = ["RUB", "USD", "EUR"] as const;
+const FIELD_BORDER_COLOR = "hsl(30deg 3.3% 11.8% / 15%)";
+const LABEL_COLOR = "#3d3d3a";
+const MUTED_COLOR = "#73726c";
 
 const emptyPriceItem: PriceItemState = {
   label: "",
@@ -71,7 +72,6 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
     description: "",
     currency: "RUB",
     basePrice: 0,
-    priceItems: [],
     ...initialState,
     priceItems: initialState?.priceItems?.map((item) => ({
       ...emptyPriceItem,
@@ -262,25 +262,16 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
   };
 
   return (
-    <Card className="w-full bg-white border-none shadow-none px-0 py-0">
-      <CardHeader className="gap-0 border-b border-neutral-200 px-4 py-3 md:px-6 [&_.border-b]:pb-0">
-        <div className="flex w-full items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <SidebarTrigger className="-ml-1" />
-            <span className="h-6 w-px bg-neutral-200" aria-hidden="true" />
-            <CardTitle className="text-base font-medium text-neutral-900">
-              {productId ? "Редактирование товара" : "Новый товар"}
-            </CardTitle>
-          </div>
-          <Button asChild variant="ghost" size="sm" className="text-sm text-neutral-500 hover:text-neutral-900">
-            <Link href="/catalog">Назад</Link>
-          </Button>
-        </div>
-      </CardHeader>
+    <Card
+      className="w-full rounded-[0.75rem] border-0 bg-white px-0 py-0 shadow-none"
+      style={{
+        boxShadow: "0 1px 1px 0 rgba(0, 0, 0, 0.06), 0 0 1px 0 rgba(0, 0, 0, 0.3)",
+      }}
+    >
       <CardContent className="space-y-6 px-4 py-6 md:px-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="name" className="text-sm font-medium">
+            <Label htmlFor="name" className="mb-2 block text-sm font-medium" style={{ color: LABEL_COLOR }}>
               Название *
             </Label>
             <Input
@@ -295,7 +286,7 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
           </div>
           <div className="grid gap-4 md:grid-cols-[1.2fr_1fr_auto]">
             <div>
-              <Label htmlFor="sku" className="text-sm font-medium">
+              <Label htmlFor="sku" className="mb-2 block text-sm font-medium" style={{ color: LABEL_COLOR }}>
                 SKU
               </Label>
               <Input
@@ -306,13 +297,13 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
                 value={state.sku ?? ""}
                 onChange={handleChange}
               />
-              <p className="mt-1 text-xs text-neutral-500">
+              <p className="mt-1.5 text-xs" style={{ color: MUTED_COLOR }}>
                 Технический идентификатор для поиска и интеграций.
               </p>
               {errors.sku && <p className="mt-2 text-sm text-rose-600">{errors.sku}</p>}
             </div>
             <div>
-              <Label htmlFor="basePrice" className="text-sm font-medium">
+              <Label htmlFor="basePrice" className="mb-2 block text-sm font-medium" style={{ color: LABEL_COLOR }}>
                 Базовая цена *
               </Label>
               <Input
@@ -329,12 +320,12 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
               {errors.basePrice && <p className="mt-2 text-sm text-rose-600">{errors.basePrice}</p>}
             </div>
             <div>
-              <Label className="text-sm font-medium">Валюта *</Label>
+              <Label className="mb-2 block text-sm font-medium" style={{ color: LABEL_COLOR }}>Валюта *</Label>
               <Select
                 value={state.currency}
                 onValueChange={(value) => setState((prev) => ({ ...prev, currency: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full" style={{ borderColor: FIELD_BORDER_COLOR }}>
                   <SelectValue placeholder="Выберите валюту" />
                 </SelectTrigger>
                 <SelectContent>
@@ -351,12 +342,12 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
         </div>
 
         <div className="space-y-4">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-base font-semibold text-neutral-900">Расшифровка (опционально)</p>
-                <p className="text-sm text-neutral-500">
-                  Строки подтягиваются в блок «Таблица цен». Итоговая сумма: {" "}
-                <span className="font-medium text-neutral-900">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-base font-semibold" style={{ color: LABEL_COLOR }}>Расшифровка (опционально)</p>
+              <p className="text-sm" style={{ color: MUTED_COLOR }}>
+                Строки подтягиваются в блок «Таблица цен». Итоговая сумма:{" "}
+                <span className="font-medium" style={{ color: LABEL_COLOR }}>
                   {new Intl.NumberFormat("ru-RU", {
                     style: "currency",
                     currency: state.currency || "RUB",
@@ -378,7 +369,14 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
           </div>
 
           {state.priceItems.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-neutral-200 bg-neutral-50 px-4 py-6 text-sm text-neutral-500">
+            <div
+              className="rounded-lg border border-dashed px-4 py-6 text-sm"
+              style={{
+                borderColor: FIELD_BORDER_COLOR,
+                color: MUTED_COLOR,
+                backgroundColor: "rgb(243, 242, 240)",
+              }}
+            >
               Позиции отсутствуют. Добавьте строки, если хотите детализировать стоимость.
             </div>
           ) : (
@@ -388,18 +386,19 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
                 return (
                   <div
                     key={index}
-                    className="grid gap-4 rounded-xl border border-neutral-200 p-4 md:grid-cols-[1.5fr_repeat(3,1fr)_auto]"
+                    className="grid gap-4 rounded-xl border p-4 md:grid-cols-[1.5fr_repeat(3,1fr)_auto]"
+                    style={{ borderColor: FIELD_BORDER_COLOR }}
                   >
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Название</Label>
+                    <div>
+                      <Label className="mb-2 block text-sm font-medium" style={{ color: LABEL_COLOR }}>Название</Label>
                       <Input
                         value={item.label}
                         onChange={(event) => updatePriceItem(index, { label: event.target.value })}
                         placeholder="Например, Внедрение"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Кол-во</Label>
+                    <div>
+                      <Label className="mb-2 block text-sm font-medium" style={{ color: LABEL_COLOR }}>Кол-во</Label>
                       <Input
                         type="number"
                         min="1"
@@ -407,8 +406,8 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
                         onChange={(event) => updatePriceItem(index, { qty: Number(event.target.value) })}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Цена</Label>
+                    <div>
+                      <Label className="mb-2 block text-sm font-medium" style={{ color: LABEL_COLOR }}>Цена</Label>
                       <Input
                         type="number"
                         min="0"
@@ -417,8 +416,8 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
                         onChange={(event) => updatePriceItem(index, { unitPrice: Number(event.target.value) })}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Скидка %</Label>
+                    <div>
+                      <Label className="mb-2 block text-sm font-medium" style={{ color: LABEL_COLOR }}>Скидка %</Label>
                       <Input
                         type="number"
                         min="0"
@@ -448,9 +447,9 @@ export function ProductForm({ productId, initialState, workspaceId = DEFAULT_WOR
           )}
         </div>
       </CardContent>
-      <Separator className="bg-neutral-200" />
+      <Separator style={{ backgroundColor: FIELD_BORDER_COLOR }} />
       <CardFooter className="flex flex-col gap-3 py-6 md:flex-row md:items-center md:justify-between">
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm" style={{ color: MUTED_COLOR }}>
           Убедитесь, что все данные актуальны. Изменения сразу появятся в редакторе документов.
         </p>
         <div className="flex gap-2">

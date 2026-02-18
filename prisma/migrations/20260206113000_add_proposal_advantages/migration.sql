@@ -1,0 +1,3 @@
+ALTER TABLE "Proposal"
+ADD COLUMN "advantages" JSONB,
+ADD COLUMN "advantagesColumns" INTEGER NOT NULL DEFAULT 3;

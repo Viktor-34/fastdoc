@@ -1,0 +1,193 @@
+/* BlockChrome - унифицированная обертка для блоков редактора */
+
+.block-chrome {
+  position: relative;
+  margin: 16px 0;
+  transition: all 0.2s ease;
+}
+
+/* Контент блока */
+.block-chrome__content {
+  position: relative;
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Состояние при наведении */
+.block-chrome:hover .block-chrome__content {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Состояние выделения */
+.block-chrome--selected .block-chrome__content {
+  box-shadow: 0 0 0 2px #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Состояние перетаскивания */
+.block-chrome--dragging {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Базовые стили для кнопок */
+.block-chrome__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.block-chrome__button:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.block-chrome__button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Drag handle слева */
+.block-chrome__drag-handle {
+  position: absolute;
+  left: -44px;
+  top: 8px;
+  z-index: 10;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.2s ease;
+}
+
+.block-chrome:hover .block-chrome__drag-handle,
+.block-chrome--selected .block-chrome__drag-handle {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.block-chrome__button--drag {
+  cursor: grab;
+}
+
+.block-chrome__button--drag:active {
+  cursor: grabbing;
+}
+
+/* Контролы справа */
+.block-chrome__actions {
+  position: absolute;
+  right: -44px;
+  top: 8px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: all 0.2s ease;
+}
+
+.block-chrome:hover .block-chrome__actions,
+.block-chrome--selected .block-chrome__actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.block-chrome__button--action {
+  width: 28px;
+  height: 28px;
+}
+
+.block-chrome__button--danger:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+/* Кнопки добавления блока */
+.block-chrome__add-button {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 50%;
+  background: white;
+  color: #64748b;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.block-chrome__add-button--top {
+  top: -12px;
+}
+
+.block-chrome__add-button--bottom {
+  bottom: -12px;
+}
+
+.block-chrome:hover .block-chrome__add-button,
+.block-chrome--selected .block-chrome__add-button {
+  opacity: 1;
+}
+
+.block-chrome__add-button:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.block-chrome__add-button:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+/* Адаптивность для узких экранов */
+@media (max-width: 768px) {
+  .block-chrome__drag-handle {
+    left: -36px;
+  }
+  
+  .block-chrome__actions {
+    right: -36px;
+  }
+}
+
+/* Анимация появления */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.block-chrome:hover .block-chrome__button,
+.block-chrome--selected .block-chrome__button {
+  animation: fadeInSlide 0.2s ease;
+}
+
+
+

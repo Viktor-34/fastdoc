@@ -25,7 +25,7 @@ export default function TitleInput({ initialTitle = '', onChange }: TitleInputPr
         onChange(event.target.value);
       }}
       placeholder="Название предложения"
-      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-lg font-semibold text-slate-800 shadow-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
+      className="w-full rounded-xl border border-[var(--field-border)] bg-white px-4 py-2 text-lg font-semibold text-slate-800 shadow-sm transition-[color,box-shadow,border-color] focus:border-[var(--field-focus)] focus:outline-none focus:ring-[3px] focus:ring-[var(--field-ring)]"
     />
   );
 }

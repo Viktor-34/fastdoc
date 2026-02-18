@@ -1,23 +1,40 @@
 /* Обёртка предпросмотра, создаёт нейтральный фон и отступы вокруг страницы. */
 .public-preview { min-height:100vh; padding:40px 16px 72px; background:#F7F7F5; }
 
-/* Контейнер печатной страницы, имитирует лист A4 и центрирует его. */
-.public-preview .page { width:min(210mm, 100%); max-width:210mm; min-height:297mm; padding:32px; margin:0 auto 32px; background:#ffffff; border-radius:20px; box-shadow:0 24px 48px -32px rgba(15,23,42,0.25); box-sizing:border-box; }
+/* Контейнер печатной страницы, повторяет ширину холста из редактора. */
+.public-preview .page {
+  width:min(870px, 100%);
+  max-width:870px;
+  min-height:297mm;
+  padding:32px;
+  margin:0 auto 32px;
+  background:#ffffff;
+  border-radius:20px;
+  box-shadow:0 24px 48px -32px rgba(15,23,42,0.25);
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap: 12px; /* Расстояние между блоками как в редакторе */
+}
 
 /* Оформление кнопки скачивания, чтобы пользователь быстро забрал документ. */
 .public-preview .download-button { display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:12px; border:1px solid #3C323E; background:#3C323E; color:#ffffff; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s ease,border-color .2s ease; }
 .public-preview .download-button:hover { background:#655D67; border-color:#655D67; }
 
 /* Сбрасываем стандартные отступы браузера для всех элементов внутри страницы. */
-.public-preview .page *,
-.page * {
+.public-preview .page * {
   font-family: inherit;
   margin: 0 !important;
   margin-block-start: 0 !important;
   margin-block-end: 0 !important;
   margin-inline-start: 0 !important;
   margin-inline-end: 0 !important;
+  padding: 0;
 }
+
+/* Убираем margin, используем gap */
+.public-preview .page > * { margin: 0 !important; }
+
 
 /* Базовая типографика для заголовков, абзацев и списков на странице. */
 .public-preview .page p { margin:0; color:#1f2937; }
@@ -30,22 +47,20 @@
 .public-preview .page li { margin:0; }
 .public-preview .page li p { margin:0; }
 /* Двухколоночная сетка для блоков с содержимым внутри документа. */
-.public-preview .two-columns,
-.page .two-columns { display:grid; gap:24px; padding:24px; margin:0; background:#ffffff; border-radius:16px; box-shadow:0 1px 3px rgba(15,23,42,0.08); grid-template-columns:repeat(2,minmax(0,1fr)); }
+.public-preview .two-columns { display:grid; gap:24px; padding:24px; margin:0; background:#ffffff; border-radius:16px; grid-template-columns:repeat(2,minmax(0,1fr)); }
 
 /* Настройки колонок и вертикальных промежутков между элементами. */
-.public-preview .two-columns__column,
-.page .two-columns__column { display:flex; flex-direction:column; gap:16px; }
-.public-preview .two-columns__column p:last-child,
-.page .two-columns__column p:last-child { margin-bottom:0; }
+.public-preview .two-columns__column { display:flex; flex-direction:column; gap:16px; }
+.public-preview .two-columns__column p:last-child { margin-bottom:0; }
 .public-preview .two-columns__column h1,
-.page .two-columns__column h1,
 .public-preview .two-columns__column h2,
-.page .two-columns__column h2,
 .public-preview .two-columns__column h3,
-.page .two-columns__column h3,
-.public-preview .two-columns__column h4,
-.page .two-columns__column h4 { margin-top:0; }
+.public-preview .two-columns__column h4 { margin-top:0; }
+
+.public-preview .logo-section { position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:8px; padding:24px; background:var(--logo-section-bg,#ffffff); background-size:cover; background-position:center; background-repeat:no-repeat; min-height:240px; }
+.public-preview .logo-section__inner { display:flex; align-items:center; justify-content:center; width:100%; min-height:inherit; }
+.public-preview .logo-section__logo-image { width:var(--logo-section-logo-size,160px); max-width:min(100%, var(--logo-section-logo-size,160px)); height:auto; object-fit:contain; }
+.public-preview .logo-section__placeholder { display:flex; align-items:center; justify-content:center; padding:16px 24px; border-radius:9999px; border:1px dashed rgba(148,163,184,0.7); font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; background-color:rgba(255,255,255,0.8); }
 
 /* Оформление блоков кода, чтобы сниппеты выделялись моноширинным шрифтом. */
 .public-preview .page pre { background:#0f172a; color:#f8fafc; padding:16px; border-radius:12px; font-size:14px; overflow-x:auto; margin:0; }
@@ -62,16 +77,177 @@
 .public-preview .image-block { position:relative; padding:0; border:none; background:transparent; margin:0; width:100%; overflow:hidden; }
 .public-preview .image-block img { display:block; border-radius:16px; object-fit:cover; }
 
+.public-preview .features-section { position:relative; display:flex; flex-direction:column; gap:24px; padding-top:32px; padding-bottom:0; border-radius:8px; background:var(--feature-section-bg,#ffffff); background-size:cover; background-position:center; background-repeat:no-repeat; min-height:auto; }
+.public-preview .features-section__inner { display:grid; gap:24px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+.public-preview .features-section__inner > *:first-child { grid-column:1 / -1; }
+.public-preview .feature-item { display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:12px; }
+.public-preview .feature-item__icon { width:var(--feature-icon-size,64px); height:var(--feature-icon-size,64px); display:flex; align-items:center; justify-content:center; border-radius:9999px; background:#f4f4f5; color:#1f2937; overflow:hidden; }
+.public-preview .feature-item__icon-image { width:100%; height:100%; object-fit:cover; }
+.public-preview .feature-item__icon-placeholder { display:flex; align-items:center; justify-content:center; font-size:32px !important; line-height:1; }
+.public-preview .feature-item__content p { color:#1f2937; font-size:14px; line-height:1.45; }
+.public-preview .feature-item__content h4 { margin:0; font-size:1rem; font-weight:600; color:#111827; }
+
+/* Блок с текстом и изображением в двух колонках */
+.public-preview .text-image-section { position:relative; display:flex; padding-top:32px; padding-bottom:32px; border-radius:16px; background:var(--text-image-section-bg,#ffffff); background-size:cover; background-position:center; background-repeat:no-repeat; min-height:400px; }
+.public-preview .text-image-section__inner { display:grid; grid-template-columns:1fr 1fr; gap:32px; width:100%; align-items:center; }
+.public-preview .text-image-section__content { display:flex; flex-direction:column; gap:16px; height:100%; }
+.public-preview .text-image-section[data-content-align="start"] .text-image-section__content { justify-content:flex-start; }
+.public-preview .text-image-section[data-content-align="center"] .text-image-section__content { justify-content:center; }
+.public-preview .text-image-section[data-content-align="end"] .text-image-section__content { justify-content:flex-end; }
+.public-preview .text-image-section__content h2 { font-size:32px; font-weight:bold; color:#1e293b; }
+.public-preview .text-image-section__content p { font-size:16px; line-height:1.6; color:#475569; }
+.public-preview .text-image-section__image { display:flex; align-items:center; justify-content:center; height:100%; min-height:300px; overflow:hidden; border-radius:12px; }
+.public-preview .text-image-section__image img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+.public-preview .text-image-section__placeholder { display:flex; align-items:center; justify-content:center; width:100%; height:100%; background:#FAFAFA; position:relative; min-height:300px; border-radius:12px; }
+.public-preview .text-image-section__placeholder::before { content:''; position:absolute; width:113.75px; height:113.44px; background:radial-gradient(circle,rgba(192,191,191,0.4) 0%,rgba(192,191,191,0) 70%); z-index:1; }
+.public-preview .text-image-section__placeholder::after { content:''; position:absolute; width:40px; height:40px; background-image:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FFFFFF' stroke='%23E5E5E5' stroke-width='1'/%3E%3Cpath d='M16 17.5C16 17.5 16.5 17 17.5 17C18.5 17 19 17.5 19 17.5L23 21.5M16 17.5V26.5M16 17.5L12 21.5M23 21.5V26.5M23 21.5L27 17.5M23 26.5H16M23 26.5L27 22.5M16 26.5L12 22.5' stroke='%2357534D' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size:contain; background-repeat:no-repeat; background-position:center; z-index:2; }
+
+/* Галерея изображений */
+.public-preview .gallery-section { position:relative; display:flex; flex-direction:column; padding-top:32px; padding-bottom:32px; border-radius:8px; background:var(--gallery-section-bg,#ffffff); background-size:cover; background-position:center; background-repeat:no-repeat; }
+.public-preview .gallery-section__inner { display:grid; grid-template-columns:repeat(var(--gallery-columns,2),minmax(0,1fr)); gap:var(--gallery-gap,16px); width:100%; }
+.public-preview .gallery-item { position:relative; aspect-ratio:1; overflow:hidden; border-radius:8px; background:#FAFAFA; display:flex; align-items:center; justify-content:center; }
+.public-preview .gallery-item__image { width:100%; height:100%; object-fit:cover; }
+.public-preview .gallery-item__placeholder { display:flex; align-items:center; justify-content:center; width:100%; height:100%; background:#FAFAFA; position:relative; min-height:200px; }
+.public-preview .gallery-item__placeholder::before { content:''; position:absolute; width:113.75px; height:113.44px; background:radial-gradient(circle,rgba(192,191,191,0.4) 0%,rgba(192,191,191,0) 70%); z-index:1; }
+.public-preview .gallery-item__placeholder::after { content:''; position:absolute; width:40px; height:40px; background-image:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FFFFFF' stroke='%23E5E5E5' stroke-width='1'/%3E%3Cpath d='M16 17.5C16 17.5 16.5 17 17.5 17C18.5 17 19 17.5 19 17.5L23 21.5M16 17.5V26.5M16 17.5L12 21.5M23 21.5V26.5M23 21.5L27 17.5M23 26.5H16M23 26.5L27 22.5M16 26.5L12 22.5' stroke='%2357534D' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size:contain; background-repeat:no-repeat; background-position:center; z-index:2; }
+
 /* На маленьких экранах превращаем сетку из двух колонок в одну. */
 @media (max-width:768px) {
-  .public-preview .two-columns,
-  .page .two-columns { grid-template-columns:1fr; }
+  .public-preview .two-columns { grid-template-columns:1fr; }
+  .public-preview .text-image-section__inner { grid-template-columns:1fr; }
+}
+
+/* Стили для таблицы цен в предпросмотре и PDF */
+.public-preview .price-table-container {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  background: white;
+}
+
+.public-preview .price-table-header {
+  display: flex;
+  height: 40px;
+  align-items: center;
+  background: #F5F5F5;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.public-preview .price-table-header-cell {
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #0F172B;
+}
+
+.public-preview .price-table-body {
+  background: white;
+}
+
+.public-preview .price-table-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.public-preview .price-table-row:last-child {
+  border-bottom: none;
+}
+
+.public-preview .price-table-cell {
+  padding: 12px 8px;
+  font-size: 14px;
+  color: #0F172B;
+}
+
+.public-preview .price-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 12px 8px;
+  border-top: 2px solid #E5E5E5;
+  background: #FAFAFA;
+}
+
+.public-preview .price-table-footer-label {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #0F172B;
+}
+
+.public-preview .price-table-footer-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172B;
+}
+
+.public-preview .price-table-empty {
+  padding: 32px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #62748E;
+}
+
+/* Колонки таблицы цен */
+.public-preview .price-table-col-name {
+  flex: 1;
+  padding-left: 24px;
+}
+
+.public-preview .price-table-col-qty {
+  width: 120px;
+}
+
+.public-preview .price-table-col-price {
+  width: 140px;
+}
+
+.public-preview .price-table-col-discount {
+  width: 120px;
+}
+
+.public-preview .price-table-col-sum {
+  width: 140px;
+  padding-right: 24px;
+  font-weight: 500;
 }
 
 /* Настройки для печати, чтобы страница корректно экспортировалась в PDF или на бумагу. */
 @media print {
   body { background:white; }
-  .page { box-shadow:none; }
+  .public-preview .page { box-shadow:none; }
   @page { size:A4; margin:20mm 15mm; }
   .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+  
+  /* Предотвращаем разрывы внутри блоков */
+  .logo-section,
+  .features-section,
+  .feature-item,
+  .two-columns,
+  .image-block,
+  .text-image-section,
+  .price-table-container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .features-section__inner {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Заголовки не должны отрываться от контента */
+  h1, h2, h3, h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  
+  /* Обеспечиваем печать цветов фона */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
 }

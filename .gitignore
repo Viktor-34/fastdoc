@@ -46,3 +46,6 @@ public/uploads/
 
 # PDF cache
 /.cache/
+
+# local dev diagnostics
+/.logs/
