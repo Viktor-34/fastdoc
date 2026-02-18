@@ -38,5 +38,30 @@ NODE
 sanitize_database_url
 validate_database_url
 
-npx prisma migrate deploy
-npm run start
+run_migrations() {
+  if [ "${RUN_PRISMA_MIGRATIONS:-true}" != "true" ]; then
+    echo "[startup] RUN_PRISMA_MIGRATIONS=false, skipping prisma migrate deploy"
+    return 0
+  fi
+
+  timeout_seconds="${PRISMA_MIGRATE_TIMEOUT_SECONDS:-45}"
+  migrate_failed=0
+
+  echo "[startup] Running prisma migrate deploy (timeout: ${timeout_seconds}s)"
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$timeout_seconds" npx prisma migrate deploy || migrate_failed=1
+  else
+    npx prisma migrate deploy || migrate_failed=1
+  fi
+
+  if [ "$migrate_failed" -ne 0 ]; then
+    if [ "${PRISMA_MIGRATE_STRICT:-false}" = "true" ]; then
+      echo "[startup] prisma migrate deploy failed and PRISMA_MIGRATE_STRICT=true, exiting"
+      exit 1
+    fi
+    echo "[startup] Warning: prisma migrate deploy failed, continuing app startup"
+  fi
+}
+
+run_migrations
+exec npm run start
