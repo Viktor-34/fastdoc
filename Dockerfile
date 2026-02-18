@@ -9,6 +9,7 @@ RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists
 RUN npm ci
 
 COPY . .
+RUN chmod +x /app/scripts/start.sh
 
 ENV NODE_ENV=production
 
@@ -17,4 +18,4 @@ RUN NEXTAUTH_SECRET=build-only-secret npm run build
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+CMD ["sh", "/app/scripts/start.sh"]
