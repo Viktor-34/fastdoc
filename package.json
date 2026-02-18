@@ -7,11 +7,12 @@
     "dev:webpack": "next dev",
     "dev:once": "next dev",
     "dev:turbo": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
-    "migrate:documents-to-proposals": "tsx prisma/migrations/manual/migrate-documents-to-proposals.ts"
+    "migrate:documents-to-proposals": "tsx prisma/migrations/manual/migrate-documents-to-proposals.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.0",
