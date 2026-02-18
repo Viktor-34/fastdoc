@@ -1,8 +1,0 @@
-{
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/editor/page": "app/editor/page.js",
-  "/(dashboard)/page": "app/(dashboard)/page.js",
-  "/(dashboard)/catalog/page": "app/(dashboard)/catalog/page.js",
-  "/(dashboard)/clients/page": "app/(dashboard)/clients/page.js",
-  "/(dashboard)/settings/profile/page": "app/(dashboard)/settings/profile/page.js"
-}
