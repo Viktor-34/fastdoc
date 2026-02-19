@@ -121,7 +121,7 @@ export async function launchPdfBrowser() {
   } else {
     console.warn(
       '[pdf] ⚠️  Локальный Chrome/Chromium не найден. Переключаемся на @sparticuz/chromium.\n' +
-        '     Для VPS рекомендуется установить: sudo apt install -y chromium-browser\n' +
+        '     Для VPS рекомендуется установить: sudo apt install -y chromium\n' +
         '     Или задать CHROME_EXECUTABLE_PATH в .env',
     );
   }
