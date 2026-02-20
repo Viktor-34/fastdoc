@@ -1,33 +1,12 @@
 import { redirect } from "next/navigation";
-import { Users, Building2, FileText, Eye } from "lucide-react";
+import { Building2, FileText, Eye } from "lucide-react";
 
 import { getServerAuthSession } from "@/lib/auth";
 import { isProductAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db/prisma";
 import { SiteHeader } from "@/components/site-header";
 import { SectionCards } from "@/components/section-cards";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-
-const ROLE_LABELS: Record<string, string> = {
-  OWNER: "Владелец",
-  USER: "Пользователь",
-};
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+import AdminUsersTable from "@/components/AdminUsersTable";
 
 export default async function AdminPage() {
   const session = await getServerAuthSession();
@@ -88,6 +67,16 @@ export default async function AdminPage() {
   ]);
 
   const views = totalViews._sum.viewCount ?? 0;
+  const initialUsers = recentUsers.map((user) => ({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    workspaceName: user.Workspace?.name ?? null,
+    proposalsCount: user.Workspace?._count.Proposal ?? 0,
+    clientsCount: user.Workspace?._count.Client ?? 0,
+    createdAt: user.createdAt.toISOString(),
+  }));
 
   // Статусы КП.
   const statusMap: Record<string, number> = {};
@@ -151,53 +140,7 @@ export default async function AdminPage() {
           <h2 className="mb-4 text-lg font-semibold text-[#3D3D3A]">
             Пользователи ({totalUsers})
           </h2>
-          <div className="rounded-xl border border-neutral-200 bg-white">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Имя</TableHead>
-                  <TableHead>Роль</TableHead>
-                  <TableHead>Рабочее пространство</TableHead>
-                  <TableHead className="text-center">КП</TableHead>
-                  <TableHead className="text-center">Клиенты</TableHead>
-                  <TableHead>Регистрация</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentUsers.map((u) => (
-                  <TableRow key={u.id}>
-                    <TableCell className="font-medium">{u.email}</TableCell>
-                    <TableCell>{u.name ?? "—"}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={
-                          u.role === "OWNER"
-                            ? "border-amber-300 bg-amber-50 text-amber-700"
-                            : "border-neutral-200 bg-neutral-50 text-neutral-600"
-                        }
-                      >
-                        {ROLE_LABELS[u.role] ?? u.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate">
-                      {u.Workspace?.name ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {u.Workspace?._count.Proposal ?? 0}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {u.Workspace?._count.Client ?? 0}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap text-sm text-neutral-500">
-                      {formatDate(u.createdAt)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <AdminUsersTable initialUsers={initialUsers} currentUserId={session.user.id} />
         </div>
       </main>
     </>
