@@ -30,16 +30,26 @@ const emailPort = process.env.EMAIL_SERVER_PORT
   : undefined;
 const emailUser = process.env.EMAIL_SERVER_USER;
 const emailPassword = process.env.EMAIL_SERVER_PASSWORD;
+const unisenderGoApiKey = process.env.UNISENDER_GO_API_KEY?.trim();
+const unisenderGoApiUrl = (
+  process.env.UNISENDER_GO_API_URL ??
+  "https://goapi.unisender.ru/ru/transactional/api/v1"
+).replace(/\/+$/, "");
 
 const emailConfigured =
   Boolean(emailHost) &&
   Boolean(emailPort) &&
   Boolean(emailUser) &&
   Boolean(emailPassword);
+const unisenderGoApiConfigured = Boolean(unisenderGoApiKey);
 
-if (!emailConfigured && process.env.NODE_ENV === "production") {
+if (
+  !emailConfigured &&
+  !unisenderGoApiConfigured &&
+  process.env.NODE_ENV === "production"
+) {
   console.warn(
-    "[auth] ⚠️  SMTP не настроен (EMAIL_SERVER_HOST/PORT/USER/PASSWORD). " +
+    "[auth] ⚠️  Не настроены ни SMTP (EMAIL_SERVER_HOST/PORT/USER/PASSWORD), ни Unisender API (UNISENDER_GO_API_KEY). " +
       "Пользователи НЕ смогут войти через magic-link!",
   );
 }
@@ -88,16 +98,112 @@ function buildMagicLinkHtml(url: string): string {
 </html>`.trim();
 }
 
+function buildMagicLinkText(url: string): string {
+  return `Здравствуйте!\n\nПерейдите по ссылке, чтобы войти:\n${url}\n\nСсылка действует 15 минут.\n\nЕсли вы не запрашивали вход — просто проигнорируйте это письмо.`;
+}
+
+function parseFromAddress(from: string): { email: string; name?: string } {
+  const match = from.match(/^\s*([^<>]+?)\s*<\s*([^<>@\s]+@[^<>@\s]+)\s*>\s*$/);
+  if (match) {
+    return {
+      name: match[1]?.trim(),
+      email: match[2].trim(),
+    };
+  }
+
+  return { email: from.trim() };
+}
+
+async function sendMagicLinkViaUnisenderApi({
+  identifier,
+  subject,
+  text,
+  html,
+}: {
+  identifier: string;
+  subject: string;
+  text: string;
+  html: string;
+}) {
+  if (!unisenderGoApiKey) {
+    throw new Error("[auth] Unisender API key is not configured");
+  }
+
+  const { email, name } = parseFromAddress(emailFrom);
+  const payload = {
+    message: {
+      recipients: [{ email: identifier }],
+      body: {
+        html,
+        plaintext: text,
+      },
+      subject,
+      from_email: email,
+      track_links: false,
+      track_read: false,
+      ...(name ? { from_name: name } : {}),
+    },
+  };
+
+  const response = await fetch(`${unisenderGoApiUrl}/email/send.json`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-API-KEY": unisenderGoApiKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const rawBody = await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `[auth] Unisender API error ${response.status}: ${rawBody || response.statusText}`,
+    );
+  }
+
+  if (rawBody) {
+    try {
+      const parsed = JSON.parse(rawBody) as { status?: string; message?: string };
+      if (parsed?.status === "error") {
+        throw new Error(
+          `[auth] Unisender API error: ${parsed.message ?? "unknown error"}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("[auth] Unisender API")) {
+        throw error;
+      }
+      // Ignore non-JSON success bodies.
+    }
+  }
+}
+
 async function sendVerificationRequest({
   identifier,
   url,
 }: SendVerificationRequestParams) {
+  const subject = "Ваш вход в Offerdoc";
+  const text = buildMagicLinkText(url);
+  const html = buildMagicLinkHtml(url);
+
+  if (unisenderGoApiConfigured) {
+    await sendMagicLinkViaUnisenderApi({
+      identifier,
+      subject,
+      text,
+      html,
+    });
+    return;
+  }
+
   await emailTransport.sendMail({
     to: identifier,
     from: emailFrom,
-    subject: "Ваш вход в Offerdoc",
-    text: `Здравствуйте!\n\nПерейдите по ссылке, чтобы войти:\n${url}\n\nСсылка действует 15 минут.\n\nЕсли вы не запрашивали вход — просто проигнорируйте это письмо.`,
-    html: buildMagicLinkHtml(url),
+    subject,
+    text,
+    html,
   });
 
   if (!emailConfigured) {
