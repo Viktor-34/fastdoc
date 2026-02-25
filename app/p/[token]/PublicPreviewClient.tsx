@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface PublicPreviewClientProps {
   token: string;
@@ -9,9 +9,14 @@ interface PublicPreviewClientProps {
 
 export default function PublicPreviewClient({ token, proposalHtml }: PublicPreviewClientProps) {
   const [iframeHeight, setIframeHeight] = useState('100vh');
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (iframeRef.current?.contentWindow && event.source !== iframeRef.current.contentWindow) {
+        return;
+      }
+
       if (event.data?.type !== 'resize') {
         return;
       }
@@ -21,8 +26,16 @@ export default function PublicPreviewClient({ token, proposalHtml }: PublicPrevi
         return;
       }
 
-      const nextHeight = Math.max(320, Math.round(rawHeight + 40));
-      setIframeHeight(`${nextHeight}px`);
+      // Avoid feedback loops: child iframe can emit a resize event when parent changes iframe height.
+      // Do not add a persistent offset on every message, otherwise height can grow indefinitely.
+      const nextHeight = Math.max(320, Math.ceil(rawHeight));
+      setIframeHeight((prevHeight) => {
+        const prev = Number.parseInt(prevHeight, 10);
+        if (Number.isFinite(prev) && Math.abs(prev - nextHeight) <= 1) {
+          return prevHeight;
+        }
+        return `${nextHeight}px`;
+      });
     };
 
     window.addEventListener('message', handleMessage);
@@ -115,6 +128,7 @@ export default function PublicPreviewClient({ token, proposalHtml }: PublicPrevi
         }}
       >
         <iframe
+          ref={iframeRef}
           srcDoc={proposalHtml}
           style={{
             width: '100%',
