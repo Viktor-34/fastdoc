@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/db/prisma';
 import { renderProposalToHtml } from '@/lib/pdf/renderProposal';
-import type { Proposal } from '@/lib/types/proposal';
+import { isProductVariantItemRow, type Proposal } from '@/lib/types/proposal';
 import {
   parseAdvantages,
   parseAdvantagesColumns,
@@ -132,6 +132,9 @@ export default async function PublicPage({ params }: PublicPageProps) {
 
   // Рендерим Proposal через тот же рендерер, что и PDF - для идентичного вида
   let proposalHtml = '';
+  let variantPreviewTabs:
+    | Array<{ id: string; name: string; isRecommended?: boolean; html: string }>
+    | undefined;
   if (share.Proposal) {
     const items = parseProposalItems(share.Proposal.items);
     const galleryImages = safeParseStringArray(share.Proposal.galleryImages);
@@ -156,7 +159,9 @@ export default async function PublicPage({ params }: PublicPageProps) {
       items,
       pricingMode: normalizedPricingMode,
       productVariants,
-      activeVariantId: share.Proposal.activeVariantId ?? undefined,
+      // В публичном предпросмотре всегда открываем первый вариант по умолчанию,
+      // независимо от того, какой вариант был активен в редакторе.
+      activeVariantId: productVariants[0]?.id ?? share.Proposal.activeVariantId ?? undefined,
       productsView: parseProductsView(share.Proposal.productsView),
       galleryImages,
       advantages,
@@ -179,12 +184,49 @@ export default async function PublicPage({ params }: PublicPageProps) {
       notes: share.Proposal.notes ?? undefined,
     };
 
-    proposalHtml = renderProposalToHtml({
-      proposal: proposalPayload,
+    const renderContext = {
       workspace: share.Proposal.Workspace || undefined,
       client: share.Proposal.Client || undefined,
-    });
+    };
+
+    const nonEmptyVariants = productVariants.filter(
+      (variant) => Array.isArray(variant.rows) && variant.rows.some(isProductVariantItemRow),
+    );
+
+    if (nonEmptyVariants.length > 1) {
+      variantPreviewTabs = nonEmptyVariants.map((variant) => {
+        const variantProposal: Proposal = {
+          ...proposalPayload,
+          productVariants: [variant],
+          activeVariantId: variant.id,
+        };
+
+        return {
+          id: variant.id,
+          name: variant.name,
+          isRecommended: variant.isRecommended,
+          html: renderProposalToHtml({
+            proposal: variantProposal,
+            publicPreviewVariantTabsSpacerPx: 72,
+            ...renderContext,
+          }),
+        };
+      });
+
+      proposalHtml = variantPreviewTabs[0]?.html ?? '';
+    } else {
+      proposalHtml = renderProposalToHtml({
+        proposal: proposalPayload,
+        ...renderContext,
+      });
+    }
   }
 
-  return <PublicPreviewClient token={token} proposalHtml={proposalHtml} />;
+  return (
+    <PublicPreviewClient
+      token={token}
+      proposalHtml={proposalHtml}
+      variantPreviewTabs={variantPreviewTabs}
+    />
+  );
 }
