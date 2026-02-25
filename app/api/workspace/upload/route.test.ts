@@ -19,6 +19,14 @@ vi.mock('fs/promises', () => ({
 }));
 
 describe('POST /api/workspace/upload', () => {
+  const createRequestMock = (overrides: Record<string, unknown> = {}) =>
+    ({
+      headers: {
+        get: vi.fn().mockReturnValue(null),
+      },
+      ...overrides,
+    }) as unknown as Parameters<(typeof import('./route'))['POST']>[0];
+
   beforeEach(() => {
     vi.clearAllMocks();
     mkdirMock.mockResolvedValue(undefined);
@@ -29,9 +37,9 @@ describe('POST /api/workspace/upload', () => {
     getServerAuthSessionMock.mockResolvedValue(null);
 
     const { POST } = await import('./route');
-    const request = {
+    const request = createRequestMock({
       formData: vi.fn(),
-    } as unknown as Parameters<typeof POST>[0];
+    });
 
     const response = await POST(request);
 
@@ -54,9 +62,9 @@ describe('POST /api/workspace/upload', () => {
     formData.set('field', 'logoUrl');
 
     const { POST } = await import('./route');
-    const request = {
+    const request = createRequestMock({
       formData: vi.fn().mockResolvedValue(formData),
-    } as unknown as Parameters<typeof POST>[0];
+    });
 
     const response = await POST(request);
 

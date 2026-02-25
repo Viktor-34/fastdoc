@@ -103,6 +103,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ token:
       advantages: Array.isArray(share.Proposal.advantages)
         ? (share.Proposal.advantages as unknown as AdvantageItem[])
         : [],
+      advantagesTitle: share.Proposal.advantagesTitle ?? undefined,
       advantagesColumns:
         typeof share.Proposal.advantagesColumns === 'number'
           ? (Math.min(3, Math.max(1, share.Proposal.advantagesColumns)) as 1 | 2 | 3)

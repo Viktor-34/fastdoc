@@ -32,7 +32,7 @@ type PreviewWorkspace = {
 
 const SECTIONS = [
   { id: 'basic' as const, title: 'Основное', icon: '📄' },
-  { id: 'context' as const, title: 'Контекст', icon: '💡' },
+  { id: 'context' as const, title: 'Основной текст', icon: '💡' },
   { id: 'advantages' as const, title: 'Преимущества', icon: '✨' },
   { id: 'products' as const, title: 'Продукты', icon: '📦' },
   { id: 'terms' as const, title: 'Условия', icon: '📋' },

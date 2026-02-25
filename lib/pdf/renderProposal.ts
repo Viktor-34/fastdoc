@@ -84,6 +84,12 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
   const vatAmount = calculateVatAmount(proposal);
   const total = calculateProposalTotal(proposal);
   const advantages = Array.isArray(proposal.advantages) ? proposal.advantages : [];
+  const advantagesTitle =
+    proposal.advantagesTitle == null
+      ? 'Преимущества'
+      : typeof proposal.advantagesTitle === 'string'
+        ? proposal.advantagesTitle.trim()
+        : '';
   const parsedAdvantagesColumns = Number(proposal.advantagesColumns);
   const advantagesColumns = Number.isFinite(parsedAdvantagesColumns)
     ? Math.min(3, Math.max(1, parsedAdvantagesColumns))
@@ -457,7 +463,7 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
   <!-- Преимущества -->
   ${isSectionVisible('advantages') && advantages.length > 0 ? `
     <div class="section">
-      <div class="section-title">Преимущества</div>
+      ${advantagesTitle ? `<div class="section-title">${escapeHtml(advantagesTitle)}</div>` : ''}
       <div class="advantages-grid" style="--advantages-columns: ${effectiveAdvantagesColumns}">
         ${advantages.map((item) => `
           <div class="advantage-card">

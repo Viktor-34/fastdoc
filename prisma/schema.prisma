@@ -193,6 +193,7 @@ model Proposal {
 
   // Преимущества (JSON массив карточек с иконкой, заголовком и описанием)
   advantages     Json?
+  advantagesTitle String?
   advantagesColumns Int @default(3)
 
   // Настройки видимости разделов (JSON массив названий секций)

@@ -84,6 +84,7 @@ export interface Proposal {
 
   // Преимущества
   advantages?: AdvantageItem[];
+  advantagesTitle?: string;
   advantagesColumns?: 1 | 2 | 3;
 
   // Настройки видимости разделов

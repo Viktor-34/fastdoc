@@ -111,6 +111,7 @@ export const proposalSchema = z.object({
     (value) => (value === null ? undefined : value),
     z.array(advantageSchema).optional(),
   ),
+  advantagesTitle: nullableString,
   advantagesColumns: z.preprocess(
     (value) => {
       if (value === null || value === undefined || value === "") return 3;

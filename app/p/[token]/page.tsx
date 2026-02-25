@@ -160,6 +160,7 @@ export default async function PublicPage({ params }: PublicPageProps) {
       productsView: parseProductsView(share.Proposal.productsView),
       galleryImages,
       advantages,
+      advantagesTitle: share.Proposal.advantagesTitle ?? undefined,
       advantagesColumns: parseAdvantagesColumns(share.Proposal.advantagesColumns),
       status: normalizedStatus,
       clientId: share.Proposal.clientId ?? undefined,

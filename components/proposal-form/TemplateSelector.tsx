@@ -144,7 +144,7 @@ export default function TemplateSelector({ onSelect, onClose }: TemplateSelector
                         className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600"
                       >
                         {section === 'basic' && 'Основное'}
-                        {section === 'context' && 'Контекст'}
+                        {section === 'context' && 'Основной текст'}
                         {section === 'advantages' && 'Преимущества'}
                         {section === 'products' && 'Товары'}
                         {section === 'terms' && 'Условия'}
@@ -187,5 +187,4 @@ export default function TemplateSelector({ onSelect, onClose }: TemplateSelector
     </div>
   );
 }
-
 

@@ -24,6 +24,7 @@ const createAdvantage = (): AdvantageItem => ({
 
 export default function AdvantagesSection({ proposal, onUpdate }: AdvantagesSectionProps) {
   const advantages = useMemo(() => proposal.advantages ?? [], [proposal.advantages]);
+  const advantagesTitle = proposal.advantagesTitle ?? 'Преимущества';
   const columns = proposal.advantagesColumns ?? 3;
 
   const updateAdvantages = useCallback(
@@ -90,11 +91,19 @@ export default function AdvantagesSection({ proposal, onUpdate }: AdvantagesSect
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="mb-2 block text-sm font-medium" style={{ color: '#3d3d3a' }}>
-          Преимущества
-        </h3>
-        <p className="text-xs" style={{ color: '#73726c' }}>
-          Добавьте до {MAX_ADVANTAGES} карточек: иконка, заголовок и описание.
+        <label htmlFor="advantages-title" className="mb-2 block text-sm font-medium" style={{ color: '#3d3d3a' }}>
+          Название блока в документе
+        </label>
+        <input
+          id="advantages-title"
+          type="text"
+          value={advantagesTitle}
+          onChange={(event) => onUpdate('advantagesTitle', event.target.value)}
+          placeholder="Преимущества"
+          className="w-full rounded-lg border border-[var(--field-border)] bg-white px-4 py-2.5 text-sm text-[#3d3d3a] placeholder:text-[var(--field-placeholder)] transition-[color,box-shadow,border-color] focus:border-[var(--field-focus)] focus:outline-none focus:ring-[3px] focus:ring-[var(--field-ring)]"
+        />
+        <p className="mt-1.5 text-xs" style={{ color: TEXT_MUTED }}>
+          Этот заголовок будет показан в превью, публичном просмотре и PDF. Оставьте пустым, чтобы скрыть.
         </p>
       </div>
 

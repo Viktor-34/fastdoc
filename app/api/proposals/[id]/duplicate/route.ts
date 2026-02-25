@@ -64,6 +64,7 @@ export async function POST(
           originalProposal.advantages === null || originalProposal.advantages === undefined
             ? Prisma.JsonNull
             : (originalProposal.advantages as Prisma.InputJsonValue),
+        advantagesTitle: originalProposal.advantagesTitle,
         advantagesColumns: originalProposal.advantagesColumns,
         visibleSections:
           originalProposal.visibleSections === null || originalProposal.visibleSections === undefined
@@ -86,7 +87,6 @@ export async function POST(
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-
 
 
 
