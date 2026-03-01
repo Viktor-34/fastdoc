@@ -1,50 +1,58 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
-import { FilePlus2, LayoutPanelLeftIcon, ListIcon, LogOut, PenSquare, Settings, ShieldCheck, Users } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
 
 import {
+  AdminPanelIcon,
+  CatalogIcon,
+  ClientsIcon,
+  LogoutIcon,
+  NewProposalIcon,
+  ProposalsListIcon,
+  SettingsIcon,
+} from "@/components/icons/sidebar-nav-icons"
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 
 // Статичный список ссылок, которые показываем в боковой навигации.
 const NAV_ITEMS = [
   {
     title: "Список предложений",
     href: "/",
-    icon: ListIcon,
+    icon: ProposalsListIcon,
   },
   {
     title: "Каталог",
     href: "/catalog",
-    icon: LayoutPanelLeftIcon,
+    icon: CatalogIcon,
   },
   {
     title: "Клиенты",
     href: "/clients",
-    icon: Users,
+    icon: ClientsIcon,
   },
   {
     title: "Новый документ",
     href: "/editor",
-    icon: PenSquare,
+    icon: NewProposalIcon,
   },
   {
     title: "Настройки",
     href: "/settings/profile",
-    icon: Settings,
+    icon: SettingsIcon,
   },
 ]
 
@@ -52,7 +60,7 @@ const NAV_ITEMS = [
 const ADMIN_NAV_ITEM = {
   title: "Админ-панель",
   href: "/admin",
-  icon: ShieldCheck,
+  icon: AdminPanelIcon,
 }
 
 // Основной сайдбар приложения со статичными ссылками и кнопкой создания документа.
@@ -79,18 +87,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="text-base font-semibold"
-              tooltip="Offerdoc"
+              className="h-auto rounded-lg px-2 py-2"
+              tooltip="Список предложений"
             >
-              <Link href="/">Offerdoc</Link>
+              <Link href="/" aria-label="Список предложений">
+                <Image
+                  src="/logo.svg"
+                  alt="Offerdoc"
+                  width={84}
+                  height={28}
+                  priority
+                  className="h-[28px] w-auto"
+                />
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Навигация</SidebarGroupLabel>
-          <SidebarMenu>
+        <SidebarGroup className="pt-5">
+          <SidebarMenu className="gap-0.5">
             {navItems.map((item) => {
               // Для главной страницы сравниваем точное совпадение, для остальных — по префиксу.
               const isActive =
@@ -105,10 +121,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     asChild
                     tooltip={item.title}
                     isActive={isActive}
+                    className="h-auto gap-3 rounded-lg px-2 py-2.5 font-medium text-[#3D3D3A]"
                   >
-                    <Link href={item.href} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                    <Link href={item.href} className="group/nav-item flex items-center gap-3 [&>svg]:size-[18px]!">
+                      <item.icon
+                        className={cn(
+                          "size-[18px] shrink-0 text-[#73726C] transition-colors group-hover/nav-item:text-[#FF5929]",
+                          isActive && "text-[#FF5929]"
+                        )}
+                      />
+                      <span className="tracking-[-0.02em]">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,16 +139,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      {/* Нижняя зона с кнопкой для создания нового документа. */}
+      {/* Нижняя зона с профилем и отдельной кнопкой выхода. */}
       <SidebarFooter className="border-t border-sidebar-border px-4 py-4">
         <div className="flex flex-col gap-3">
-          <Button asChild size="sm" className="w-full justify-center gap-2">
-            <Link href="/editor">
-              <FilePlus2 className="h-4 w-4" />
-              Новый документ
-            </Link>
-          </Button>
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-sidebar-border bg-sidebar-accent/50 px-3 py-2">
+          <div className="flex items-center gap-3 rounded-lg border border-sidebar-border bg-sidebar-accent/50 px-3 py-2">
             <div className="flex items-center gap-3">
               <Avatar className="size-9">
                 <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? user?.email ?? "Профиль"} />
@@ -141,16 +157,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 )}
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="shrink-0"
-              onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-              title="Выйти"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+            className="ring-sidebar-ring flex w-full cursor-pointer items-center justify-start gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-sidebar-foreground outline-hidden transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2"
+            title="Выйти"
+          >
+            <span>Выйти</span>
+            <LogoutIcon className="size-[18px] shrink-0 text-[#73726C]" />
+          </button>
         </div>
       </SidebarFooter>
     </Sidebar>
