@@ -2,10 +2,10 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { isProductAdmin } from "@/lib/admin";
-import { consumeMagicLinkToken, normalizeEmail } from "@/lib/auth/magic-link";
+import { authSessionMaxAgeSeconds } from "@/lib/auth/session";
+import { ensureWorkspaceForUser, type WorkspaceAssignableUser } from "@/lib/auth/workspace";
 import { getServerSession } from "next-auth";
 import type { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
 
 const authSecret =
   process.env.NEXTAUTH_SECRET ??
@@ -22,54 +22,13 @@ if (usingDevSecretFallback) {
   );
 }
 
-type WorkspaceAssignableUser = {
-  id: string;
-  email?: string | null;
-  name?: string | null;
-  workspaceId?: string | null;
-  role?: string | null;
-};
-
-function buildWorkspaceName(user: WorkspaceAssignableUser) {
-  if (user.name?.trim()) return `${user.name.trim()} — рабочее пространство`;
-  if (user.email?.trim()) {
-    const emailPrefix = user.email.trim().split("@")[0] ?? "workspace";
-    return `${emailPrefix} — рабочее пространство`;
-  }
-  return "Моё рабочее пространство";
-}
-
-async function ensureWorkspaceForUser(user: WorkspaceAssignableUser) {
-  if (user.workspaceId) return user.workspaceId;
-
-  const workspace = await prisma.workspace.create({
-    data: {
-      name: buildWorkspaceName(user),
-    },
-  });
-
-  // Роль OWNER назначается только администраторам продукта (ADMIN_EMAILS),
-  // все остальные получают USER (Prisma default).
-  const role = isProductAdmin(user.email) ? "OWNER" : "USER";
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      workspaceId: workspace.id,
-      role,
-    },
-  });
-
-  return workspace.id;
-}
-
 export const enabledOAuthProviders: Array<{ id: string; name: string }> = [];
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as NextAuthOptions["adapter"],
   session: {
     strategy: "database",
-    maxAge: 60 * 60 * 24 * 30, // 30 дней
+    maxAge: authSessionMaxAgeSeconds,
   },
   secret: authSecret,
   pages: {
@@ -77,54 +36,7 @@ export const authOptions: NextAuthOptions = {
     verifyRequest: "/auth/verify-request",
     error: "/auth/error",
   },
-  providers: [
-    CredentialsProvider({
-      id: "magic-link",
-      name: "Magic Link",
-      credentials: {
-        token: { label: "Token", type: "text" },
-      },
-      async authorize(credentials) {
-        const token = typeof credentials?.token === "string" ? credentials.token.trim() : "";
-        if (!token) return null;
-
-        const payload = await consumeMagicLinkToken(token);
-        if (!payload) return null;
-
-        const email = normalizeEmail(payload.email);
-        let user = await prisma.user.findUnique({
-          where: { email },
-        });
-
-        if (!user) {
-          user = await prisma.user.create({
-            data: {
-              email,
-              role: isProductAdmin(email) ? "OWNER" : "USER",
-            },
-          });
-        }
-
-        if (!user.workspaceId) {
-          await ensureWorkspaceForUser(user as WorkspaceAssignableUser);
-          user = await prisma.user.findUnique({
-            where: { email },
-          });
-        }
-
-        if (!user) return null;
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-          workspaceId: user.workspaceId,
-        };
-      },
-    }),
-  ],
+  providers: [],
   callbacks: {
     async session({ session, user }) {
       if (session.user) {

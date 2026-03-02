@@ -1,6 +1,9 @@
 import crypto from "node:crypto";
 
+import { isProductAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db/prisma";
+import { authSessionMaxAgeSeconds } from "@/lib/auth/session";
+import { ensureWorkspaceForUser } from "@/lib/auth/workspace";
 
 const emailFrom = process.env.EMAIL_FROM ?? "no-reply@offerdoc.app";
 const emailHost = process.env.EMAIL_SERVER_HOST;
@@ -269,4 +272,44 @@ export async function consumeMagicLinkToken(token: string): Promise<{ email: str
   if (result.count !== 1) return null;
 
   return { email: record.email };
+}
+
+export async function findOrCreateMagicLinkUser(email: string) {
+  const normalizedEmail = normalizeEmail(email);
+  let user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        role: isProductAdmin(normalizedEmail) ? "OWNER" : "USER",
+      },
+    });
+  }
+
+  if (!user.workspaceId) {
+    await ensureWorkspaceForUser(user);
+    user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+  }
+
+  return user;
+}
+
+export async function createDatabaseSession(userId: string) {
+  const sessionToken = crypto.randomUUID();
+  const expires = new Date(Date.now() + authSessionMaxAgeSeconds * 1000);
+
+  const session = await prisma.session.create({
+    data: {
+      userId,
+      sessionToken,
+      expires,
+    },
+  });
+
+  return session;
 }
