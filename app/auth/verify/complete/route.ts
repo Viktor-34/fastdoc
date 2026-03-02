@@ -9,7 +9,8 @@ import { getAuthSessionCookieName, getAuthSessionCookieOptions } from "@/lib/aut
 import { DEFAULT_WORKSPACE_ID, WORKSPACE_COOKIE } from "@/lib/workspace-constants";
 
 function buildRedirectUrl(req: NextRequest, pathname: string, search?: string) {
-  const url = new URL(pathname, req.nextUrl.origin);
+  const origin = process.env.NEXTAUTH_URL ?? req.nextUrl.origin;
+  const url = new URL(pathname, origin);
   if (search) url.search = search;
   return url;
 }
