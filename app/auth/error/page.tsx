@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type PageProps = {
@@ -35,9 +36,16 @@ export default async function AuthErrorPage({ searchParams }: PageProps) {
       <main className="flex flex-1 items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
         <div className="w-full max-w-md rounded-3xl border border-neutral-200 bg-white px-8 py-10 shadow-xl">
           <div className="space-y-4 text-center">
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-neutral-400">
-              Offerdoc
-            </p>
+            <div className="flex justify-center">
+              <Image
+                src="/logo.svg"
+                alt="Offerdoc"
+                width={92}
+                height={26}
+                priority
+                className="h-[26px] w-auto"
+              />
+            </div>
             <h1 className="text-2xl font-semibold text-neutral-900">Не удалось войти</h1>
             <p className="text-sm text-neutral-500">{message}</p>
           </div>

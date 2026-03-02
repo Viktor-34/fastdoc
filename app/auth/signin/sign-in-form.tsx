@@ -78,21 +78,25 @@ export function SignInForm({ oauthProviders, initialError }: SignInFormProps) {
 
   return (
     <div className="mt-6 space-y-6">
-      <form className="space-y-4" onSubmit={handleEmailSubmit}>
-        <label className="block space-y-2 text-left">
-          <span className="text-sm font-medium text-neutral-700">Email</span>
+      <form className="space-y-3" onSubmit={handleEmailSubmit}>
+        <label className="block text-left">
           <Input
             type="email"
             inputMode="email"
-            placeholder="you@example.com"
+            placeholder="Введите ваш email"
             value={email}
             autoComplete="email"
             onChange={(event) => setEmail(event.target.value)}
             required
             disabled={isLoading || isSent}
+            className="h-12 rounded-[12px]"
           />
         </label>
-        <Button type="submit" className="w-full gap-2" disabled={isLoading || isSent}>
+        <Button
+          type="submit"
+          className="h-12 w-full rounded-[12px] gap-2 text-[16px]"
+          disabled={isLoading || isSent}
+        >
           {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
           {isSent ? "Ссылка отправлена" : "Получить ссылку для входа"}
         </Button>
@@ -100,17 +104,13 @@ export function SignInForm({ oauthProviders, initialError }: SignInFormProps) {
 
       {feedback ? (
         <p
-          className={`text-sm ${
+          className={`text-left text-sm ${
             feedback.kind === "error" ? "text-red-600" : "text-emerald-600"
           }`}
         >
           {feedback.message}
         </p>
-      ) : (
-        <p className="text-sm text-neutral-500">
-          Мы отправим одноразовую ссылку для входа на указанный email.
-        </p>
-      )}
+      ) : null}
 
       {oauthProviders.length > 0 && (
         <div className="space-y-4">

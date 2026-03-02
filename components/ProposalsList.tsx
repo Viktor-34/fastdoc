@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Copy, Link2, Loader2, Trash2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
 
 // Статусы КП
 export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected';
@@ -211,38 +209,8 @@ export default function ProposalsList({ initialDocuments, query = "", statusFilt
     setCurrentPage((prev) => Math.min(prev, totalPages));
   }, [totalPages]);
 
-  // Если предложений совсем нет, показываем заглушку с кнопкой создания.
-  if (documents.length === 0) {
-    return (
-      <Card className="border border-dashed p-0">
-        <CardContent className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-base font-semibold text-neutral-900">
-              Пока нет предложений
-            </CardTitle>
-            <p className="text-sm text-neutral-500">
-              Создайте новое предложение, чтобы начать работу.
-            </p>
-          </div>
-          <Button asChild size="sm" className="self-start">
-            <Link href="/editor">Создать предложение</Link>
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Если список есть, но запрос ничего не нашёл, выводим подсказку.
-  if (filtered.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-neutral-200 bg-white px-6 py-8 text-center text-sm text-neutral-500">
-        Ничего не найдено. Попробуйте изменить запрос.
-      </div>
-    );
-  }
-
   return (
-      <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {/* Таблица */}
       <div className="overflow-hidden rounded-lg border" style={{ borderColor: TABLE_BORDER_COLOR }}>
         <div className="overflow-x-auto">
@@ -275,130 +243,138 @@ export default function ProposalsList({ initialDocuments, query = "", statusFilt
 
             {/* Тело таблицы */}
             <div className="bg-white">
-              {paginatedDocuments.map((doc) => {
-                const isDeleting = deletingId === doc.id;
-                const isCopying = copyingId === doc.id;
-                const isCopied = copiedId === doc.id;
-                const isDuplicating = duplicatingId === doc.id;
+              {filtered.length === 0 ? (
+                <div className="px-6 py-10 text-center text-sm text-neutral-500">
+                  {documents.length === 0
+                    ? "Пока нет предложений. Создайте первое предложение, чтобы начать работу."
+                    : "Ничего не найдено. Попробуйте изменить запрос."}
+                </div>
+              ) : (
+                paginatedDocuments.map((doc) => {
+                  const isDeleting = deletingId === doc.id;
+                  const isCopying = copyingId === doc.id;
+                  const isCopied = copiedId === doc.id;
+                  const isDuplicating = duplicatingId === doc.id;
 
-                return (
-                  <div
-                    key={doc.id}
-                    className="flex items-center gap-8 border-b transition-colors hover:bg-neutral-50"
-                    style={{ borderColor: TABLE_BORDER_COLOR }}
-                  >
-                    {/* Название */}
-                    <div className="min-w-[220px] flex-1 px-[10px] py-2 pl-[26px]">
-                      <Link
-                        href={`/editor?proposalId=${doc.id}`}
-                        className="block truncate text-[14px] font-medium tracking-tight transition-colors hover:text-neutral-700"
-                        style={{ color: TABLE_TEXT_PRIMARY }}
-                      >
-                        {doc.title || "Без названия"}
-                      </Link>
-                    </div>
+                  return (
+                    <div
+                      key={doc.id}
+                      className="flex items-center gap-8 border-b transition-colors hover:bg-neutral-50"
+                      style={{ borderColor: TABLE_BORDER_COLOR }}
+                    >
+                      {/* Название */}
+                      <div className="min-w-[220px] flex-1 px-[10px] py-2 pl-[26px]">
+                        <Link
+                          href={`/editor?proposalId=${doc.id}`}
+                          className="block truncate text-[14px] font-medium tracking-tight transition-colors hover:text-neutral-700"
+                          style={{ color: TABLE_TEXT_PRIMARY }}
+                        >
+                          {doc.title || "Без названия"}
+                        </Link>
+                      </div>
 
-                    {/* Статус */}
-                    <div className="flex w-[120px] shrink-0 items-center px-2 py-2">
-                      {(() => {
-                        const statusStyle = STATUS_CHIP_STYLES[doc.status ?? "draft"];
-                        return (
-                          <span
-                            className="inline-flex h-[22px] items-center rounded-full border px-[10px] text-[12px] font-medium"
+                      {/* Статус */}
+                      <div className="flex w-[120px] shrink-0 items-center px-2 py-2">
+                        {(() => {
+                          const statusStyle = STATUS_CHIP_STYLES[doc.status ?? "draft"];
+                          return (
+                            <span
+                              className="inline-flex h-[22px] items-center rounded-full border px-[10px] text-[12px] font-medium"
+                              style={{
+                                backgroundColor: statusStyle.backgroundColor,
+                                color: statusStyle.color,
+                                borderColor: statusStyle.borderColor,
+                              }}
+                            >
+                              {statusStyle.label}
+                            </span>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Клиент */}
+                      <div className="flex w-[180px] shrink-0 items-center px-2 py-2">
+                        {doc.clientName ? (
+                          <div
+                            className="flex h-[22px] items-center justify-center rounded-full border px-[10px]"
                             style={{
-                              backgroundColor: statusStyle.backgroundColor,
-                              color: statusStyle.color,
-                              borderColor: statusStyle.borderColor,
+                              backgroundColor: "#F3F2F0",
+                              borderColor: TABLE_BORDER_COLOR,
                             }}
                           >
-                            {statusStyle.label}
-                          </span>
-                        );
-                      })()}
-                    </div>
+                            <span className="max-w-[150px] truncate text-[12px] font-medium" style={{ color: TABLE_TEXT_PRIMARY }}>
+                              {doc.clientName}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-neutral-400">—</span>
+                        )}
+                      </div>
 
-                    {/* Клиент */}
-                    <div className="flex w-[180px] shrink-0 items-center px-2 py-2">
-                      {doc.clientName ? (
-                        <div
-                          className="flex h-[22px] items-center justify-center rounded-full border px-[10px]"
-                          style={{
-                            backgroundColor: "#F3F2F0",
-                            borderColor: TABLE_BORDER_COLOR,
-                          }}
+                      {/* Обновлено */}
+                      <div className="flex w-[220px] shrink-0 items-center px-2 py-2 pl-6">
+                        <span className="whitespace-nowrap text-[12px] font-medium" style={{ color: "rgb(115, 114, 108)" }}>
+                          {new Date(doc.updatedAt).toLocaleDateString("ru-RU", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric"
+                          })}{" "}
+                          {new Date(doc.updatedAt).toLocaleTimeString("ru-RU", {
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          })}
+                        </span>
+                      </div>
+
+                      {/* Действия */}
+                      <div className="flex shrink-0 items-center gap-2 px-2">
+                        <button
+                          type="button"
+                          disabled={isCopying}
+                          onClick={() => handleCopyLink(doc.id)}
+                          className="flex items-center gap-2 transition-colors hover:text-neutral-900 disabled:opacity-50"
+                          style={{ color: TABLE_TEXT_MUTED }}
+                          title={isCopied ? "Скопировано" : "Скопировать ссылку"}
                         >
-                          <span className="max-w-[150px] truncate text-[12px] font-medium" style={{ color: TABLE_TEXT_PRIMARY }}>
-                            {doc.clientName}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-neutral-400">—</span>
-                      )}
+                          {isCopying ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Link2 className="size-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isDuplicating}
+                          onClick={() => handleDuplicate(doc.id)}
+                          className="flex size-8 items-center justify-center rounded-md transition-colors hover:bg-neutral-100 hover:text-[var(--field-focus)] disabled:opacity-50"
+                          style={{ color: TABLE_TEXT_MUTED }}
+                          title="Дублировать"
+                        >
+                          {isDuplicating ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Copy className="size-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isDeleting}
+                          onClick={() => handleDelete(doc.id)}
+                          className="flex size-8 items-center justify-center rounded-md transition-colors hover:bg-neutral-100 hover:text-red-500 disabled:opacity-50"
+                          style={{ color: TABLE_TEXT_MUTED }}
+                          title="Удалить"
+                        >
+                          {isDeleting ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="size-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
-
-                    {/* Обновлено */}
-                    <div className="flex w-[220px] shrink-0 items-center px-2 py-2 pl-6">
-                      <span className="whitespace-nowrap text-[12px] font-medium" style={{ color: "rgb(115, 114, 108)" }}>
-                        {new Date(doc.updatedAt).toLocaleDateString("ru-RU", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric"
-                        })}{" "}
-                        {new Date(doc.updatedAt).toLocaleTimeString("ru-RU", {
-                          hour: "2-digit",
-                          minute: "2-digit"
-                        })}
-                      </span>
-                    </div>
-
-                    {/* Действия */}
-                    <div className="flex shrink-0 items-center gap-2 px-2">
-                      <button
-                        type="button"
-                        disabled={isCopying}
-                        onClick={() => handleCopyLink(doc.id)}
-                        className="flex items-center gap-2 transition-colors hover:text-neutral-900 disabled:opacity-50"
-                        style={{ color: TABLE_TEXT_MUTED }}
-                        title={isCopied ? "Скопировано" : "Скопировать ссылку"}
-                      >
-                        {isCopying ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          <Link2 className="size-4" />
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={isDuplicating}
-                        onClick={() => handleDuplicate(doc.id)}
-                        className="flex size-8 items-center justify-center rounded-md transition-colors hover:bg-neutral-100 hover:text-[var(--field-focus)] disabled:opacity-50"
-                        style={{ color: TABLE_TEXT_MUTED }}
-                        title="Дублировать"
-                      >
-                        {isDuplicating ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          <Copy className="size-4" />
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={isDeleting}
-                        onClick={() => handleDelete(doc.id)}
-                        className="flex size-8 items-center justify-center rounded-md transition-colors hover:bg-neutral-100 hover:text-red-500 disabled:opacity-50"
-                        style={{ color: TABLE_TEXT_MUTED }}
-                        title="Удалить"
-                      >
-                        {isDeleting ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="size-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

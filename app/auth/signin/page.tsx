@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { enabledOAuthProviders, getServerAuthSession } from "@/lib/auth";
@@ -38,30 +38,38 @@ export default async function SignInPage({ searchParams }: PageProps) {
   const errorMessage = resolveAuthError(resolvedSearchParams);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7F7F5]">
+    <div
+      className="flex min-h-screen flex-col bg-[#F7F7F5] bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/auth-signin-bg.svg')" }}
+    >
       <main className="flex flex-1 items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
         <div className="w-full max-w-md rounded-3xl border border-neutral-200 bg-white px-8 py-10 shadow-xl">
-          <div className="space-y-2 text-center">
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-neutral-400">
-              Offerdoc
-            </p>
-            <h1 className="text-2xl font-semibold text-neutral-900">Вход в аккаунт</h1>
-            <p className="text-sm text-neutral-500">
-              Используйте одноразовую ссылку, которую мы отправим на ваш email.
+          <div className="space-y-2 text-left">
+            <div className="flex justify-start">
+              <Image
+                src="/logo.svg"
+                alt="Offerdoc"
+                width={92}
+                height={26}
+                priority
+                className="h-[26px] w-auto"
+              />
+            </div>
+            <h1
+              className="mt-7 text-[24px] font-semibold leading-tight tracking-[-0.02em]"
+              style={{ color: "rgb(61, 61, 58)" }}
+            >
+              Вход в аккаунт
+            </h1>
+            <p className="text-left text-sm text-neutral-500">
+              Мы отправим одноразовую ссылку для входа на указанный email.
             </p>
           </div>
 
           <SignInForm oauthProviders={enabledOAuthProviders} initialError={errorMessage} />
 
-          <p className="mt-8 text-center text-xs text-neutral-400">
-            Отправляя письмо, вы соглашаетесь с{" "}
-            <Link
-              href="https://offerdoc.app/privacy"
-              className="font-medium text-neutral-600 underline-offset-4 hover:underline"
-            >
-              политикой конфиденциальности
-            </Link>
-            .
+          <p className="mt-5 text-left text-xs text-neutral-400">
+            Отправляя письмо, вы соглашаетесь с политикой конфиденциальности.
           </p>
         </div>
       </main>

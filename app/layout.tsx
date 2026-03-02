@@ -20,6 +20,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Offerdoc",
   description: "Коммерческие предложения: редактор, предпросмотр, PDF, публичные ссылки",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+  },
 };
 
 // Базовый layout приложения: задаёт язык, фон и подключает шрифты.
