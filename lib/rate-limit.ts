@@ -42,6 +42,54 @@ function getStore(name: string): Map<string, RateLimitEntry> {
   return store;
 }
 
+function buildRateLimitResponse(
+  entry: RateLimitEntry,
+  now: number,
+  limit: number,
+  windowMs: number,
+) {
+  const retryAfterMs = entry.timestamps[0] + windowMs - now;
+  const retryAfterSec = Math.ceil(retryAfterMs / 1000);
+
+  return NextResponse.json(
+    { error: "Too many requests. Please try again later." },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(retryAfterSec),
+        "X-RateLimit-Limit": String(limit),
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": String(Math.ceil((entry.timestamps[0] + windowMs) / 1000)),
+      },
+    },
+  );
+}
+
+function checkStoreLimit(
+  store: Map<string, RateLimitEntry>,
+  key: string,
+  limit: number,
+  windowMs: number,
+) {
+  const now = Date.now();
+  const windowStart = now - windowMs;
+
+  let entry = store.get(key);
+  if (!entry) {
+    entry = { timestamps: [] };
+    store.set(key, entry);
+  }
+
+  entry.timestamps = entry.timestamps.filter((t) => t > windowStart);
+
+  if (entry.timestamps.length >= limit) {
+    return buildRateLimitResponse(entry, now, limit, windowMs);
+  }
+
+  entry.timestamps.push(now);
+  return null;
+}
+
 /**
  * Создаёт rate limiter с заданными параметрами.
  *
@@ -66,37 +114,15 @@ export function createRateLimiter(name: string, options: RateLimiterOptions) {
       req.headers.get("x-real-ip") ||
       "unknown";
 
-    const now = Date.now();
-    const windowStart = now - windowMs;
+    return checkStoreLimit(store, ip, limit, windowMs);
+  };
+}
 
-    let entry = store.get(ip);
-    if (!entry) {
-      entry = { timestamps: [] };
-      store.set(ip, entry);
-    }
+export function createKeyedRateLimiter(name: string, options: RateLimiterOptions) {
+  const { limit, windowMs } = options;
+  const store = getStore(name);
 
-    // Удаляем timestamps за пределами окна.
-    entry.timestamps = entry.timestamps.filter((t) => t > windowStart);
-
-    if (entry.timestamps.length >= limit) {
-      const retryAfterMs = entry.timestamps[0] + windowMs - now;
-      const retryAfterSec = Math.ceil(retryAfterMs / 1000);
-
-      return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": String(retryAfterSec),
-            "X-RateLimit-Limit": String(limit),
-            "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": String(Math.ceil((entry.timestamps[0] + windowMs) / 1000)),
-          },
-        },
-      );
-    }
-
-    entry.timestamps.push(now);
-    return null; // Не заблокирован.
+  return function checkRateLimitByKey(key: string): NextResponse | null {
+    return checkStoreLimit(store, key, limit, windowMs);
   };
 }

@@ -43,17 +43,29 @@ export function SignInForm({ oauthProviders, initialError }: SignInFormProps) {
     setFeedback(null);
 
     try {
-      const response = await signIn("email", {
-        email,
-        redirect: false,
-        callbackUrl: "/",
+      const response = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
       });
 
-      if (response?.error) {
+      if (!response.ok) {
+        if (response.status === 429) {
+          setStatus("error");
+          setFeedback({
+            kind: "error",
+            message: "Слишком много попыток. Подождите немного и попробуйте снова.",
+          });
+          return;
+        }
+
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
         setStatus("error");
         setFeedback({
           kind: "error",
-          message: "Не удалось отправить письмо. Попробуйте ещё раз.",
+          message: payload?.error ?? "Не удалось отправить письмо. Попробуйте ещё раз.",
         });
         return;
       }
@@ -61,7 +73,7 @@ export function SignInForm({ oauthProviders, initialError }: SignInFormProps) {
       setStatus("sent");
       setFeedback({
         kind: "success",
-        message: "Проверьте почту: ссылка для входа отправлена.",
+        message: "Проверьте почту: ссылка для подтверждения входа отправлена.",
       });
     } catch (error) {
       console.error("[auth] Ошибка отправки magic-link:", error);

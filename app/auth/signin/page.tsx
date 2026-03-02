@@ -62,7 +62,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
               Вход в аккаунт
             </h1>
             <p className="text-left text-sm text-neutral-500">
-              Мы отправим одноразовую ссылку для входа на указанный email.
+              Мы отправим ссылку для подтверждения входа на указанный email.
             </p>
           </div>
 
