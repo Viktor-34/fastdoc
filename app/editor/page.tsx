@@ -31,13 +31,13 @@ type PreviewWorkspace = {
 };
 
 const SECTIONS = [
-  { id: 'basic' as const, title: 'Основное', icon: '📄' },
-  { id: 'context' as const, title: 'Основной текст', icon: '💡' },
-  { id: 'advantages' as const, title: 'Преимущества', icon: '✨' },
-  { id: 'products' as const, title: 'Продукты', icon: '📦' },
-  { id: 'terms' as const, title: 'Условия', icon: '📋' },
-  { id: 'gallery' as const, title: 'Галерея', icon: '🖼️' },
-  { id: 'contacts' as const, title: 'Контакты', icon: '📞' },
+  { id: 'basic' as const, title: 'Основное' },
+  { id: 'context' as const, title: 'Описание' },
+  { id: 'advantages' as const, title: 'Преимущества' },
+  { id: 'products' as const, title: 'Продукты' },
+  { id: 'terms' as const, title: 'Условия' },
+  { id: 'gallery' as const, title: 'Галерея' },
+  { id: 'contacts' as const, title: 'Контакты' },
 ];
 
 const DEFAULT_VISIBLE_SECTIONS: SectionId[] = [
@@ -402,7 +402,6 @@ export default function EditorPage() {
                       } ${isVisible ? 'cursor-pointer' : 'cursor-default'}`}
                       style={!isActive ? { color: isVisible ? '#3d3d3a' : '#a8a39a' } : undefined}
                     >
-                      <span className="text-lg">{section.icon}</span>
                       <span className="flex-1">{section.title}</span>
                       <button
                         type="button"

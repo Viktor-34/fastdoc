@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
       productsView: parseProductsView(proposal.productsView),
       advantages,
       advantagesTitle: proposal.advantagesTitle ?? undefined,
+      galleryTitle: proposal.galleryTitle ?? undefined,
       advantagesColumns: advantagesColumns as 1 | 2 | 3,
       status: normalizedStatus,
       clientId: proposal.clientId ?? undefined,

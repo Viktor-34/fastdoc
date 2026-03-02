@@ -2,7 +2,6 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { isProductAdmin } from "@/lib/admin";
-import nodemailer from "nodemailer";
 import type { SendVerificationRequestParams } from "next-auth/providers/email";
 import { getServerSession } from "next-auth";
 import type { NextAuthOptions } from "next-auth";
@@ -54,21 +53,39 @@ if (
   );
 }
 
-const emailTransport = emailConfigured
-  ? nodemailer.createTransport({
-      host: emailHost,
-      port: emailPort,
-      secure: emailPort === 465,
-      auth: {
-        user: emailUser,
-        pass: emailPassword,
-      },
-    })
-  : nodemailer.createTransport({
-      streamTransport: true,
-      buffer: true,
-      newline: "unix",
-    });
+let emailTransportPromise: Promise<{
+  sendMail: (options: {
+    to: string;
+    from: string;
+    subject: string;
+    text: string;
+    html: string;
+  }) => Promise<unknown>;
+}> | null = null;
+
+async function getEmailTransport() {
+  if (!emailTransportPromise) {
+    emailTransportPromise = import("nodemailer").then(({ default: nodemailer }) =>
+      emailConfigured
+        ? nodemailer.createTransport({
+            host: emailHost,
+            port: emailPort,
+            secure: emailPort === 465,
+            auth: {
+              user: emailUser,
+              pass: emailPassword,
+            },
+          })
+        : nodemailer.createTransport({
+            streamTransport: true,
+            buffer: true,
+            newline: "unix",
+          }),
+    );
+  }
+
+  return emailTransportPromise;
+}
 
 function buildMagicLinkHtml(url: string): string {
   return `
@@ -197,6 +214,8 @@ async function sendVerificationRequest({
     });
     return;
   }
+
+  const emailTransport = await getEmailTransport();
 
   await emailTransport.sendMail({
     to: identifier,

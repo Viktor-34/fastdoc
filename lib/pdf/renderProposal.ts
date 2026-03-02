@@ -96,6 +96,12 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
       : typeof proposal.advantagesTitle === 'string'
         ? proposal.advantagesTitle.trim()
         : '';
+  const galleryTitle =
+    proposal.galleryTitle == null
+      ? 'Примеры работ'
+      : typeof proposal.galleryTitle === 'string'
+        ? proposal.galleryTitle.trim()
+        : '';
   const parsedAdvantagesColumns = Number(proposal.advantagesColumns);
   const advantagesColumns = Number.isFinite(parsedAdvantagesColumns)
     ? Math.min(3, Math.max(1, parsedAdvantagesColumns))
@@ -716,7 +722,7 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
     
     .gallery {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 15px;
       margin: 20px 0;
     }
@@ -870,7 +876,7 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
   <!-- Галерея -->
   ${isSectionVisible('gallery') && proposal.galleryImages && proposal.galleryImages.length > 0 ? `
     <div class="section">
-      <div class="section-title">Примеры работ</div>
+      ${galleryTitle ? `<div class="section-title">${escapeHtml(galleryTitle)}</div>` : ''}
       <div class="gallery">
         ${proposal.galleryImages.map((url: string) => `<img src="${escapeHtml(url)}" alt="Portfolio image">`).join('')}
       </div>

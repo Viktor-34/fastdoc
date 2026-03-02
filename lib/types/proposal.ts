@@ -81,6 +81,7 @@ export interface Proposal {
 
   // Галерея
   galleryImages?: string[]; // Массив URL изображений
+  galleryTitle?: string;
 
   // Преимущества
   advantages?: AdvantageItem[];

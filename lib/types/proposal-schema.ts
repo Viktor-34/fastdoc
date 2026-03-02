@@ -107,6 +107,7 @@ export const proposalSchema = z.object({
     (value) => (value === null ? undefined : value),
     z.array(z.string()).optional(),
   ),
+  galleryTitle: nullableString,
   advantages: z.preprocess(
     (value) => (value === null ? undefined : value),
     z.array(advantageSchema).optional(),

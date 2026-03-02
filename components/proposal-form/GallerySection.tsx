@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Proposal } from '@/lib/types/proposal';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
@@ -15,7 +15,8 @@ const TEXT_MUTED = '#73726c';
 
 export default function GallerySection({ proposal, onUpdate }: GallerySectionProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const galleryImages = proposal.galleryImages || [];
+  const galleryImages = useMemo(() => proposal.galleryImages ?? [], [proposal.galleryImages]);
+  const galleryTitle = proposal.galleryTitle ?? 'Примеры работ';
 
   const handleFileSelect = useCallback(
     async (files: FileList | null) => {
@@ -87,6 +88,23 @@ export default function GallerySection({ proposal, onUpdate }: GallerySectionPro
 
   return (
     <div className="space-y-6">
+      <div>
+        <label htmlFor="gallery-title" className="mb-2 block text-sm font-medium" style={{ color: TEXT_PRIMARY }}>
+          Название блока в документе
+        </label>
+        <input
+          id="gallery-title"
+          type="text"
+          value={galleryTitle}
+          onChange={(event) => onUpdate('galleryTitle', event.target.value)}
+          placeholder="Примеры работ"
+          className="w-full rounded-lg border border-[var(--field-border)] bg-white px-4 py-2.5 text-sm text-[#3d3d3a] placeholder:text-[var(--field-placeholder)] transition-[color,box-shadow,border-color] focus:border-[var(--field-focus)] focus:outline-none focus:ring-[3px] focus:ring-[var(--field-ring)]"
+        />
+        <p className="mt-1.5 text-xs" style={{ color: TEXT_MUTED }}>
+          Этот заголовок будет показан в превью, публичном просмотре и PDF. Оставьте пустым, чтобы скрыть.
+        </p>
+      </div>
+
       <div>
         <h3 className="mb-2 text-sm font-medium" style={{ color: TEXT_PRIMARY }}>Галерея изображений</h3>
         <p className="text-xs" style={{ color: TEXT_MUTED }}>

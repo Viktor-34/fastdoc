@@ -100,6 +100,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ token:
       galleryImages: Array.isArray(share.Proposal.galleryImages)
         ? (share.Proposal.galleryImages as unknown as string[])
         : [],
+      galleryTitle: share.Proposal.galleryTitle ?? undefined,
       advantages: Array.isArray(share.Proposal.advantages)
         ? (share.Proposal.advantages as unknown as AdvantageItem[])
         : [],

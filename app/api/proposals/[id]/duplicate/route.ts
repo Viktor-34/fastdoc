@@ -60,6 +60,7 @@ export async function POST(
           originalProposal.galleryImages === null || originalProposal.galleryImages === undefined
             ? Prisma.JsonNull
             : (originalProposal.galleryImages as Prisma.InputJsonValue),
+        galleryTitle: originalProposal.galleryTitle,
         advantages:
           originalProposal.advantages === null || originalProposal.advantages === undefined
             ? Prisma.JsonNull
@@ -87,6 +88,5 @@ export async function POST(
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-
 
 

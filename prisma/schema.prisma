@@ -190,6 +190,7 @@ model Proposal {
 
   // Галерея (JSON массив URL строк)
   galleryImages  Json?
+  galleryTitle   String?
 
   // Преимущества (JSON массив карточек с иконкой, заголовком и описанием)
   advantages     Json?
