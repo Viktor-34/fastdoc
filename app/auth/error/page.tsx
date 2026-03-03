@@ -64,10 +64,10 @@ export default async function AuthErrorPage({ searchParams }: PageProps) {
             <p>
               Если проблема повторяется, напишите нам на{" "}
               <a
-                href="mailto:support@offerdoc.app"
+                href="mailto:support@kpdoc.ru"
                 className="font-medium text-neutral-700 underline-offset-4 hover:underline"
               >
-                support@offerdoc.app
+                support@kpdoc.ru
               </a>
               .
             </p>
