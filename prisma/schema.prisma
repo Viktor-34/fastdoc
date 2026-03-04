@@ -156,6 +156,8 @@ model Workspace {
   bankName      String?
   bik           String?
   accountNumber String?
+  signatoryRole String?
+  signatoryName String?
 
   // Настройки НДС
   vatDefault Boolean @default(true)

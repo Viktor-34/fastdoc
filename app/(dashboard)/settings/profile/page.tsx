@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getServerAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
 
-import { ProfileForm } from "./profile-form";
+import { ProfileSettingsSection } from "../components/settings-forms";
 
 export default async function ProfileSettingsPage() {
   const session = await getServerAuthSession();
@@ -36,6 +36,8 @@ export default async function ProfileSettingsPage() {
             bankName: true,
             bik: true,
             accountNumber: true,
+            signatoryRole: true,
+            signatoryName: true,
             vatDefault: true,
             vatRate: true,
           },
@@ -52,12 +54,15 @@ export default async function ProfileSettingsPage() {
 
   return (
     <div className="flex min-h-svh flex-1 flex-col bg-white shadow-sm">
-      <SiteHeader title="Профиль и рабочая область" />
+      <SiteHeader
+        label="Настройки"
+        title="Настройки профиля"
+        description="Личные данные пользователя и параметры рабочей области."
+      />
       <main className="mx-auto flex w-full flex-1 flex-col gap-6 bg-white px-4 pb-10 pt-6 md:px-6">
-        <ProfileForm
+        <ProfileSettingsSection
           initialName={user.name ?? ""}
           email={user.email}
-          workspaceId={session.user.workspaceId ?? ""}
           workspaceData={workspace}
           canEditWorkspace={canEditWorkspace}
         />

@@ -37,6 +37,8 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ token:
               bankName: true,
               bik: true,
               accountNumber: true,
+              signatoryRole: true,
+              signatoryName: true,
             },
           },
         },

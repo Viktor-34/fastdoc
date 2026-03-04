@@ -1,9 +1,11 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
+import { ChevronDown } from "lucide-react"
 
 import {
   AdminPanelIcon,
@@ -17,12 +19,15 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
-  SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -49,12 +54,22 @@ const NAV_ITEMS = [
     href: "/editor",
     icon: NewProposalIcon,
   },
-  {
-    title: "Настройки",
-    href: "/settings/profile",
-    icon: SettingsIcon,
-  },
 ]
+
+const SETTINGS_NAV_ITEM = {
+  title: "Настройки",
+  icon: SettingsIcon,
+  items: [
+    {
+      title: "Настройки профиля",
+      href: "/settings/profile",
+    },
+    {
+      title: "Настройки компании",
+      href: "/settings/company",
+    },
+  ],
+}
 
 // Пункт меню, доступный только владельцу (OWNER).
 const ADMIN_NAV_ITEM = {
@@ -70,7 +85,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data } = useSession()
   const user = data?.user
   const isAdmin = user?.isAdmin === true
-  const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS
+  const isSettingsRoute = pathname.startsWith("/settings")
+  const [isSettingsOpen, setIsSettingsOpen] = useState(isSettingsRoute)
+
+  useEffect(() => {
+    if (isSettingsRoute) {
+      setIsSettingsOpen(true)
+    }
+  }, [isSettingsRoute])
+
   const initials = (user?.name || user?.email || "?")
     .split(" ")
     .map((part) => part[0])
@@ -107,7 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <SidebarGroup className="pt-5">
           <SidebarMenu className="gap-0.5">
-            {navItems.map((item) => {
+            {NAV_ITEMS.map((item) => {
               // Для главной страницы сравниваем точное совпадение, для остальных — по префиксу.
               const isActive =
                 item.href === "/"
@@ -136,6 +159,78 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuItem>
               )
             })}
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip={SETTINGS_NAV_ITEM.title}
+                isActive={isSettingsRoute}
+                onClick={() => setIsSettingsOpen((prev) => !prev)}
+                className="h-auto cursor-pointer gap-3 rounded-lg px-2 py-2.5 font-medium text-[#3D3D3A]"
+              >
+                <div className="group/nav-item flex w-full items-center gap-3">
+                  <SETTINGS_NAV_ITEM.icon
+                    className={cn(
+                      "size-[18px] shrink-0 text-[#73726C] transition-colors group-hover/nav-item:text-[#FF5929]",
+                      isSettingsRoute && "text-[#FF5929]"
+                    )}
+                  />
+                  <span className="tracking-[-0.02em]">{SETTINGS_NAV_ITEM.title}</span>
+                  <ChevronDown
+                    className={cn(
+                      "ml-auto size-4 shrink-0 text-[#73726C] transition-transform duration-200",
+                      isSettingsOpen && "rotate-180"
+                    )}
+                  />
+                </div>
+              </SidebarMenuButton>
+              {isSettingsOpen ? (
+                <SidebarMenuSub>
+                  {SETTINGS_NAV_ITEM.items.map((item) => {
+                    const isActive = pathname.startsWith(item.href)
+
+                    return (
+                      <SidebarMenuSubItem key={item.href}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={isActive}
+                          className="h-auto rounded-lg px-2 py-2.5 font-medium text-[#3D3D3A]"
+                        >
+                          <Link href={item.href}>
+                            <span
+                              className={cn(
+                                "size-1 shrink-0 rounded-full transition-colors group-hover/menu-sub-item:bg-[#FF5929]",
+                                isActive ? "bg-[#FF5929]" : "bg-[#73726C]"
+                              )}
+                              aria-hidden="true"
+                            />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )
+                  })}
+                </SidebarMenuSub>
+              ) : null}
+            </SidebarMenuItem>
+            {isAdmin ? (
+              <SidebarMenuItem key={ADMIN_NAV_ITEM.href}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={ADMIN_NAV_ITEM.title}
+                  isActive={pathname.startsWith(ADMIN_NAV_ITEM.href)}
+                  className="h-auto gap-3 rounded-lg px-2 py-2.5 font-medium text-[#3D3D3A]"
+                >
+                  <Link href={ADMIN_NAV_ITEM.href} className="group/nav-item flex items-center gap-3 [&>svg]:size-[18px]!">
+                    <ADMIN_NAV_ITEM.icon
+                      className={cn(
+                        "size-[18px] shrink-0 text-[#73726C] transition-colors group-hover/nav-item:text-[#FF5929]",
+                        pathname.startsWith(ADMIN_NAV_ITEM.href) && "text-[#FF5929]"
+                      )}
+                    />
+                    <span className="tracking-[-0.02em]">{ADMIN_NAV_ITEM.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ) : null}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

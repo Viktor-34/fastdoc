@@ -15,11 +15,13 @@ type WorkspaceSettingsPayload = Partial<{
   bankName: string | null;
   bik: string | null;
   accountNumber: string | null;
+  signatoryRole: string | null;
+  signatoryName: string | null;
   vatDefault: boolean;
   vatRate: number | string;
 }>;
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerAuthSession();
     if (!session?.user?.workspaceId) {
@@ -39,6 +41,8 @@ export async function GET(req: NextRequest) {
         bankName: true,
         bik: true,
         accountNumber: true,
+        signatoryRole: true,
+        signatoryName: true,
         vatDefault: true,
         vatRate: true,
       },
@@ -87,6 +91,8 @@ export async function PATCH(req: NextRequest) {
     if (body.bankName !== undefined) updateData.bankName = body.bankName;
     if (body.bik !== undefined) updateData.bik = body.bik;
     if (body.accountNumber !== undefined) updateData.accountNumber = body.accountNumber;
+    if (body.signatoryRole !== undefined) updateData.signatoryRole = body.signatoryRole;
+    if (body.signatoryName !== undefined) updateData.signatoryName = body.signatoryName;
     if (body.vatDefault !== undefined) updateData.vatDefault = body.vatDefault;
     if (body.vatRate !== undefined) {
       const vatRate = typeof body.vatRate === "string" ? parseInt(body.vatRate, 10) : body.vatRate;
@@ -110,6 +116,8 @@ export async function PATCH(req: NextRequest) {
         bankName: true,
         bik: true,
         accountNumber: true,
+        signatoryRole: true,
+        signatoryName: true,
         vatDefault: true,
         vatRate: true,
       },

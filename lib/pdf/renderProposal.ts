@@ -21,6 +21,8 @@ interface RenderProposalOptions {
     bankName?: string | null;
     bik?: string | null;
     accountNumber?: string | null;
+    signatoryRole?: string | null;
+    signatoryName?: string | null;
   };
   client?: {
     name: string;
@@ -68,7 +70,7 @@ function getCurrencySymbol(currency: string = 'RUB'): string {
 }
 
 export function renderProposalToHtml(options: RenderProposalOptions): string {
-  const { proposal, workspace, client } = options;
+  const { proposal, workspace } = options;
   const publicPreviewVariantTabsSpacerPx =
     typeof options.publicPreviewVariantTabsSpacerPx === 'number' &&
     Number.isFinite(options.publicPreviewVariantTabsSpacerPx) &&
@@ -111,6 +113,14 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
     ? proposal.visibleSections
     : null;
   const isSectionVisible = (id: string) => !visibleSections || visibleSections.includes(id);
+  const signatoryRole =
+    typeof workspace?.signatoryRole === 'string' && workspace.signatoryRole.trim().length > 0
+      ? workspace.signatoryRole.trim()
+      : 'Уполномоченное лицо';
+  const signatoryName =
+    typeof workspace?.signatoryName === 'string' && workspace.signatoryName.trim().length > 0
+      ? workspace.signatoryName.trim()
+      : 'ФИО';
 
   const getVariantItemsForTotals = (rows: ProductVariantRow[]): ProposalItem[] =>
     rows.filter(isProductVariantItemRow).map((row) => ({
@@ -420,22 +430,36 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
     
     .header {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #e5e5e5;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid #ddd;
+      min-height: 70px;
     }
-    
+
     .logo {
-      max-width: 200px;
-      max-height: 80px;
+      display: block;
+      max-width: 240px;
+      max-height: 70px;
+      object-fit: contain;
     }
-    
+
     .company-info {
-      text-align: right;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 70px;
+      text-align: left;
       font-size: 12px;
       color: #666;
+    }
+
+    .company-name {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #1a1a1a;
     }
     
     h1 {
@@ -758,41 +782,92 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
       border-top: 1px solid #ddd;
       font-size: 11px;
       color: #666;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(250px, 0.9fr);
+      gap: 36px;
+      align-items: start;
     }
-    
-    .requisites {
-      margin-bottom: 20px;
+
+    .requisites-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
     }
-    
+
     .requisites-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 10px;
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 6px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #1a1a1a;
     }
-    
-    .signatures {
-      display: flex;
-      justify-content: flex-end;
-      gap: 30px;
-      margin-top: 30px;
+
+    .requisites {
+      align-self: start;
+      justify-self: start;
+      text-align: left;
     }
-    
-    .signature-item img {
-      max-width: 150px;
+
+    .signoff {
+      width: 100%;
+      max-width: 300px;
+      justify-self: end;
+      align-self: start;
+    }
+
+    .signoff-role {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 18px;
+    }
+
+    .signature-field {
+      position: relative;
+      height: 110px;
+      margin-bottom: 10px;
+    }
+
+    .signature-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 18px;
+      border-bottom: 1px solid #8b8b8b;
+    }
+
+    .signature-image {
+      position: absolute;
+      left: 12px;
+      bottom: 10px;
+      max-width: 165px;
       max-height: 80px;
+      object-fit: contain;
+    }
+
+    .stamp-image {
+      position: absolute;
+      right: -6px;
+      bottom: -2px;
+      max-width: 96px;
+      max-height: 96px;
+      object-fit: contain;
+      opacity: 0.9;
+    }
+
+    .signoff-name {
+      font-size: 12px;
+      color: #1a1a1a;
     }
   </style>
 </head>
 <body>
   <!-- Шапка -->
   <div class="header">
-    <div>
-      ${workspace?.logoUrl ? `<img src="${escapeHtml(workspace.logoUrl)}" alt="Logo" class="logo">` : ''}
-    </div>
+    ${workspace?.logoUrl ? `<img src="${escapeHtml(workspace.logoUrl)}" alt="Logo" class="logo">` : ''}
     <div class="company-info">
-      ${workspace?.companyName ? `<div><strong>${escapeHtml(workspace.companyName)}</strong></div>` : ''}
-      ${workspace?.inn ? `<div>ИНН: ${escapeHtml(workspace.inn)}</div>` : ''}
+      ${workspace?.companyName ? `<div class="company-name">${escapeHtml(workspace.companyName)}</div>` : ''}
     </div>
   </div>
 
@@ -907,32 +982,27 @@ export function renderProposalToHtml(options: RenderProposalOptions): string {
   ${workspace ? `
     <div class="footer">
       <div class="requisites">
-        <div><strong>Реквизиты:</strong></div>
+        <div class="requisites-title">Реквизиты</div>
         <div class="requisites-grid">
-          ${workspace.companyName ? `<div>Наименование: ${escapeHtml(workspace.companyName)}</div>` : ''}
+          ${workspace.companyName ? `<div>${escapeHtml(workspace.companyName)}</div>` : ''}
           ${workspace.inn ? `<div>ИНН: ${escapeHtml(workspace.inn)}</div>` : ''}
           ${workspace.ogrn ? `<div>ОГРН: ${escapeHtml(workspace.ogrn)}</div>` : ''}
-          ${workspace.legalAddress ? `<div style="grid-column: 1 / -1;">Юр. адрес: ${escapeHtml(workspace.legalAddress)}</div>` : ''}
+          ${workspace.legalAddress ? `<div>Юр. адрес: ${escapeHtml(workspace.legalAddress)}</div>` : ''}
           ${workspace.bankName ? `<div>Банк: ${escapeHtml(workspace.bankName)}</div>` : ''}
           ${workspace.bik ? `<div>БИК: ${escapeHtml(workspace.bik)}</div>` : ''}
-          ${workspace.accountNumber ? `<div style="grid-column: 1 / -1;">Р/С: ${escapeHtml(workspace.accountNumber)}</div>` : ''}
+          ${workspace.accountNumber ? `<div>Р/С: ${escapeHtml(workspace.accountNumber)}</div>` : ''}
         </div>
       </div>
-      
-      ${workspace.signatureUrl || workspace.stampUrl ? `
-        <div class="signatures">
-          ${workspace.signatureUrl ? `
-            <div class="signature-item">
-              <img src="${escapeHtml(workspace.signatureUrl)}" alt="Подпись">
-            </div>
-          ` : ''}
-          ${workspace.stampUrl ? `
-            <div class="signature-item">
-              <img src="${escapeHtml(workspace.stampUrl)}" alt="Печать">
-            </div>
-          ` : ''}
+
+      <div class="signoff">
+        <div class="signoff-role">${signatoryRole}</div>
+        <div class="signature-field">
+          <div class="signature-line"></div>
+          ${workspace.signatureUrl ? `<img src="${escapeHtml(workspace.signatureUrl)}" alt="Подпись" class="signature-image">` : ''}
+          ${workspace.stampUrl ? `<img src="${escapeHtml(workspace.stampUrl)}" alt="Печать" class="stamp-image">` : ''}
         </div>
-      ` : ''}
+        <div class="signoff-name">${signatoryName}</div>
+      </div>
     </div>
   ` : ''}
 

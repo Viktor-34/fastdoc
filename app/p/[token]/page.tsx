@@ -99,6 +99,8 @@ export default async function PublicPage({ params }: PublicPageProps) {
               bankName: true,
               bik: true,
               accountNumber: true,
+              signatoryRole: true,
+              signatoryName: true,
             },
           },
         },
